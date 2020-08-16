@@ -8,6 +8,7 @@ import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -16,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import fi.neskola.kartta.R;
+import fi.neskola.kartta.services.LocationService;
 
 public class MapsActivity extends AppCompatActivity{
 
@@ -74,6 +76,13 @@ public class MapsActivity extends AppCompatActivity{
 
         obstructor.setOnClickListener((v) -> closeFABMenu());
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent locationStartIntent = new Intent(this, LocationService.class);
+        startService(locationStartIntent);
     }
 
     private void showFABMenu(){

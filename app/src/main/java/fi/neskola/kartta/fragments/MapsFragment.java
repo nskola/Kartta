@@ -2,8 +2,12 @@ package fi.neskola.kartta.fragments;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +24,8 @@ import fi.neskola.kartta.R;
 
 public class MapsFragment extends Fragment {
 
+    final static int REQUEST_FINE_LOCATION = 555;
+
     // Todo toolbariin kohdennus käyttäjään
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
@@ -35,6 +41,9 @@ public class MapsFragment extends Fragment {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
+            if(checkPermissions()) {
+                googleMap.setMyLocationEnabled(true);
+            }
             LatLng sydney = new LatLng(-34, 151);
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
@@ -58,4 +67,21 @@ public class MapsFragment extends Fragment {
             mapFragment.getMapAsync(callback);
         }
     }
+
+    private boolean checkPermissions() {
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            requestPermissions();
+            return false;
+        }
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions( getActivity(),
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_FINE_LOCATION);
+    }
+
 }
