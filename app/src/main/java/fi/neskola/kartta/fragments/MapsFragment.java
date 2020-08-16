@@ -20,6 +20,8 @@ import fi.neskola.kartta.R;
 
 public class MapsFragment extends Fragment {
 
+    // Todo toolbariin kohdennus käyttäjään
+
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         /**
