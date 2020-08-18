@@ -17,6 +17,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import fi.neskola.kartta.R;
+import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.services.LocationService;
 
 public class MapsActivity extends AppCompatActivity{
@@ -26,6 +27,8 @@ public class MapsActivity extends AppCompatActivity{
     }
 
     private AppBarConfiguration mAppBarConfiguration;
+
+    private KarttaRepository karttaRepository;
 
     View obstructor;
     ExtendedFloatingActionButton fab1;
@@ -58,6 +61,7 @@ public class MapsActivity extends AppCompatActivity{
         //Start shrinked
         fab1.setExtended(false);
         fab2.setExtended(false);
+
         fab.setOnClickListener( (v) -> {
             switch (mode) {
                 case SHOW_MAP:
@@ -75,6 +79,8 @@ public class MapsActivity extends AppCompatActivity{
         });
 
         obstructor.setOnClickListener((v) -> closeFABMenu());
+
+        karttaRepository = KarttaRepository.getRepository(getApplication());
 
     }
 

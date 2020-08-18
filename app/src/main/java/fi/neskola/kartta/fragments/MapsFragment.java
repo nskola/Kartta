@@ -7,9 +7,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -24,10 +30,21 @@ import fi.neskola.kartta.R;
 
 public class MapsFragment extends Fragment {
 
+    GoogleMap googleMap;
+    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (googleMap == null)
+                return;
+
+            if ("location_fix".equals(intent.getAction())) {
+
+            }
+        }
+    };
+
     final static int REQUEST_FINE_LOCATION = 555;
-
-    // Todo toolbariin kohdennus käyttäjään
-
+    
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
         /**
@@ -41,6 +58,8 @@ public class MapsFragment extends Fragment {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
+            MapsFragment.this.googleMap = googleMap;
+            googleMap.getUiSettings().setMyLocationButtonEnabled(false);
             if(checkPermissions()) {
                 googleMap.setMyLocationEnabled(true);
             }
@@ -49,6 +68,12 @@ public class MapsFragment extends Fragment {
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         }
     };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
 
     @Nullable
     @Override
@@ -66,6 +91,24 @@ public class MapsFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.map_fragment_toolbar_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getContext().registerReceiver(broadcastReceiver, new IntentFilter("location_fix"));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getContext().unregisterReceiver(broadcastReceiver);
     }
 
     private boolean checkPermissions() {

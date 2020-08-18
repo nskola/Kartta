@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -90,5 +91,9 @@ public class LocationService extends Service {
         // You can now create a LatLng Object for use with maps
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         Toast.makeText(this, String.format(Locale.getDefault(),"got location lat:%f , %f", latLng.latitude, latLng.longitude) , Toast.LENGTH_SHORT).show();
+        Intent locationFixIntent = new Intent("location_fix");
+        locationFixIntent.putExtra("lat", latLng.latitude);
+        locationFixIntent.putExtra("lon", latLng.longitude);
+        LocalBroadcastManager.getInstance(this).sendBroadcast(locationFixIntent);
     }
 }
