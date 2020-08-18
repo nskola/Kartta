@@ -1,5 +1,6 @@
 package fi.neskola.kartta.database;
 
+import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -23,37 +24,23 @@ public abstract class KarttaDatabase extends RoomDatabase {
     public abstract PointDao pointDao();
     public abstract RecordDao recordDao();
 
-    private static volatile KarttaDatabase INSTANCE;
-    private static final int NUMBER_OF_THREADS = 4;
-    public static final ExecutorService databaseWriteExecutor =
-            Executors.newFixedThreadPool(NUMBER_OF_THREADS);
+    public static KarttaDatabase buildDataBase(Context applicationContext) {
+         KarttaDatabase database = Room.databaseBuilder(applicationContext,
+                KarttaDatabase.class,
+                "kartta_database")
+                .fallbackToDestructiveMigration()
+                .addCallback(KarttaDatabase.sRoomDatabaseOnCreateCallback)
+                .build();
 
-    public static KarttaDatabase getDatabase(final Context context) {
-        if (INSTANCE == null) {
-            synchronized (KarttaDatabase.class) {
-                if (INSTANCE == null) {
-                    INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                            KarttaDatabase.class, "kartta_database")
-                            .fallbackToDestructiveMigration()
-                            .addCallback(sRoomDatabaseOnCreateCallback)
-                            .addCallback(sRoomDatabaseCallback)
-                            .build();
-                }
-            }
-        }
-        return INSTANCE;
+        KarttaDatabase.addTestData(database);
+        return database;
     }
 
-    private static RoomDatabase.Callback sRoomDatabaseCallback = new RoomDatabase.Callback() {
-        @Override
-        public void onOpen(@NonNull SupportSQLiteDatabase db) {
-            super.onOpen(db);
-
-            databaseWriteExecutor.execute(() -> {
-
+    public static void addTestData(KarttaDatabase karttaDatabase) {
+            Executor.execute(() -> {
                 // Populate the database in the background.
-                RecordDao recordDao = INSTANCE.recordDao();
-                PointDao pointDao = INSTANCE.pointDao();
+                RecordDao recordDao = karttaDatabase.recordDao();
+                PointDao pointDao = karttaDatabase.pointDao();
 
                 recordDao.deleteAll();
                 pointDao.deleteAll();
@@ -67,17 +54,14 @@ public abstract class KarttaDatabase extends RoomDatabase {
                 pointDao.insert(point);
             });
         }
-    };
 
-    private static RoomDatabase.Callback sRoomDatabaseOnCreateCallback = new RoomDatabase.Callback() {
+    public static RoomDatabase.Callback sRoomDatabaseOnCreateCallback = new RoomDatabase.Callback() {
         @Override
-        public void onCreate(@NonNull SupportSQLiteDatabase db) {
+        public void onOpen(@NonNull SupportSQLiteDatabase db) {
+            if (BuildConfig.DEBUG) {
+                db.disableWriteAheadLogging();
+            }
             super.onCreate(db);
-            databaseWriteExecutor.execute(() -> {
-                if (BuildConfig.DEBUG) {
-                    db.disableWriteAheadLogging();
-                }
-            });
         }
     };
 

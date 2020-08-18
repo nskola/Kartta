@@ -16,9 +16,13 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
+import javax.inject.Inject;
+
 import fi.neskola.kartta.R;
+import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.services.LocationService;
+import fi.neskola.kartta.viewmodels.MapsViewModel;
 
 public class MapsActivity extends AppCompatActivity{
 
@@ -26,9 +30,14 @@ public class MapsActivity extends AppCompatActivity{
         SHOW_MAP,DRAW_ROUTE,MARK_POINT,TRACK_ROUTE
     }
 
-    private AppBarConfiguration mAppBarConfiguration;
+    @Inject
+    public KarttaRepository karttaRepository;
 
-    private KarttaRepository karttaRepository;
+    // You want Dagger to provide an instance of LoginViewModel from the graph
+    //@Inject
+    //MapsViewModel mapsViewModel;
+
+    private AppBarConfiguration mAppBarConfiguration;
 
     View obstructor;
     ExtendedFloatingActionButton fab1;
@@ -38,7 +47,12 @@ public class MapsActivity extends AppCompatActivity{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        //Dagger
+        ((KarttaApplication) getApplication()).getComponent().inject(this);
+
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.main_layout);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -79,9 +93,6 @@ public class MapsActivity extends AppCompatActivity{
         });
 
         obstructor.setOnClickListener((v) -> closeFABMenu());
-
-        karttaRepository = KarttaRepository.getRepository(getApplication());
-
     }
 
     @Override
