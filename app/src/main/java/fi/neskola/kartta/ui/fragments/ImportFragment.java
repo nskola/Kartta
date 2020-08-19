@@ -1,4 +1,4 @@
-package fi.neskola.kartta.fragments;
+package fi.neskola.kartta.ui.fragments;
 
 import android.os.Bundle;
 

@@ -1,11 +1,11 @@
-package fi.neskola.kartta.di;
+package fi.neskola.kartta.application.di;
 
 import android.app.Application;
 
 import javax.inject.Singleton;
 
 import dagger.Component;
-import fi.neskola.kartta.activities.MapsActivity;
+import fi.neskola.kartta.ui.activities.MapsActivity;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.repository.KarttaRepository;
 

@@ -7,12 +7,12 @@
 
     <fragment
         android:id="@+id/nav_home"
-        android:name="fi.neskola.kartta.fragments.MapsFragment"
+        android:name="fi.neskola.kartta.ui.fragments.MapsFragment"
         android:label="Map view" />
 
     <fragment
         android:id="@+id/nav_gallery"
-        android:name="fi.neskola.kartta.fragments.ImportFragment"
+        android:name="fi.neskola.kartta.ui.fragments.ImportFragment"
         android:label="Map view" />
 
 </navigation>

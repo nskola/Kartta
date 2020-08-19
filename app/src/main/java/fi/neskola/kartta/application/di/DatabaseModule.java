@@ -1,9 +1,7 @@
-package fi.neskola.kartta.di;
+package fi.neskola.kartta.application.di;
 
 import android.app.Application;
 import android.content.Context;
-
-import androidx.room.Room;
 
 import javax.inject.Singleton;
 

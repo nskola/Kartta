@@ -1,10 +1,11 @@
-package fi.neskola.kartta.fragments;
+package fi.neskola.kartta.ui.fragments;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -39,6 +41,9 @@ public class MapsFragment extends Fragment {
 
             if ("location_fix".equals(intent.getAction())) {
 
+            }
+            if ("set_mark_center".equals(intent.getAction())) {
+                updateMarkCenter();
             }
         }
     };
@@ -102,13 +107,16 @@ public class MapsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getContext().registerReceiver(broadcastReceiver, new IntentFilter("location_fix"));
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("location_fix");
+        intentFilter.addAction("set_mark_center");
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver,intentFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        getContext().unregisterReceiver(broadcastReceiver);
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
     }
 
     private boolean checkPermissions() {
@@ -125,6 +133,15 @@ public class MapsFragment extends Fragment {
         ActivityCompat.requestPermissions( getActivity(),
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_FINE_LOCATION);
+    }
+
+    public void updateMarkCenter() {
+        CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
+        //getMap().getMap().clear();// to remove previous marker
+        MarkerOptions options = new MarkerOptions()
+                .title("test marker")
+                .position(new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude));
+        googleMap.addMarker(options);
     }
 
 }
