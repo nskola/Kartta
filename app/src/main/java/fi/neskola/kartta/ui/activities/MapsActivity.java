@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -25,6 +26,8 @@ import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.services.LocationService;
+import fi.neskola.kartta.ui.fragments.MarkPointBottomSheetFragment;
+import fi.neskola.kartta.viewmodels.MapsViewModel;
 
 public class MapsActivity extends AppCompatActivity{
 
@@ -35,10 +38,11 @@ public class MapsActivity extends AppCompatActivity{
     @Inject
     public KarttaRepository karttaRepository;
 
-    //@Inject
-    //MapsViewModel mapsViewModel;
+    @Inject
+    MapsViewModel mapsViewModel;
 
     private AppBarConfiguration mAppBarConfiguration;
+    BottomSheetBehavior bottomSheetBehavior;
 
     View backgroundDimmer;
     ExtendedFloatingActionButton markPointButton;
@@ -55,11 +59,16 @@ public class MapsActivity extends AppCompatActivity{
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        View backgroundDimmer = findViewById(R.id.background_dimmer);
+        // Begin the transaction
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.bottom_sheet_container_fragment, MarkPointBottomSheetFragment.newInstance());
+        ft.commit();
+
+        backgroundDimmer = findViewById(R.id.background_dimmer);
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ConstraintLayout bottomSheet = findViewById(R.id.bottom_sheet);
-        BottomSheetBehavior bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.nav_home, R.id.nav_gallery)
@@ -102,6 +111,40 @@ public class MapsActivity extends AppCompatActivity{
         startService(locationStartIntent);
     }
 
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.fragment_container);
+        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
+                || super.onSupportNavigateUp();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isFABOpen || bottomSheetBehavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            setNormalState();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void markPointToMap() {
+        Intent locationFixIntent = new Intent("set_mark_center");
+        LocalBroadcastManager.getInstance(this).sendBroadcast(locationFixIntent);
+    }
+
+    public void hideFABs(){
+        mainFAB.setVisibility(View.GONE);
+        markPointButton.setVisibility(View.GONE);
+        drawRouteButton.setVisibility(View.GONE);
+    }
+
+    public void showFABs(){
+        mainFAB.setVisibility(View.VISIBLE);
+        markPointButton.setVisibility(View.VISIBLE);
+        drawRouteButton.setVisibility(View.VISIBLE);
+    }
+
     private void showFABMenu(){
         isFABOpen=true;
         markPointButton.extend();
@@ -118,32 +161,11 @@ public class MapsActivity extends AppCompatActivity{
         drawRouteButton.animate().translationY(0);
     }
 
-    @Override
-    public boolean onSupportNavigateUp() {
-        NavController navController = Navigation.findNavController(this, R.id.fragment_container);
-        return NavigationUI.navigateUp(navController, mAppBarConfiguration)
-                || super.onSupportNavigateUp();
-    }
-
-    @Override
-    public void onBackPressed() {
-        if(!isFABOpen){
-            super.onBackPressed();
-        } else {
-            closeFABMenu();
-        }
-    }
-
-    public void markPointToMap() {
-        Intent locationFixIntent = new Intent("set_mark_center");
-        LocalBroadcastManager.getInstance(this).sendBroadcast(locationFixIntent);
-    }
-
-    public void hideFABs(){
+    private void setNormalState(){
+        backgroundDimmer.setVisibility(View.INVISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
         closeFABMenu();
-        mainFAB.setVisibility(View.GONE);
-        markPointButton.setVisibility(View.GONE);
-        drawRouteButton.setVisibility(View.GONE);
+        showFABs();
     }
 
 }

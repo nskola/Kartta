@@ -5,9 +5,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="#ffffff"
-    android:paddingBottom="32dp"
+    android:paddingBottom="12dp"
     app:behavior_hideable="false"
-    app:behavior_peekHeight="24dp"
+    app:behavior_peekHeight="12dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <ImageView

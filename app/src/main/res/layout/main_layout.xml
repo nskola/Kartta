@@ -45,6 +45,23 @@
 
         </RelativeLayout>
 
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/bottom_sheet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:paddingBottom="12dp"
+            app:behavior_hideable="false"
+            app:behavior_peekHeight="12dp"
+            app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+            <FrameLayout
+                android:id="@+id/bottom_sheet_container_fragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
         <include layout="@layout/bottom_sheet_layout" />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
