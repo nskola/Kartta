@@ -28,12 +28,15 @@ public class Record {
         }
     }
 
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "record_id")
     private long id;
 
     @ColumnInfo(name = "record_type")
     private Type type;
+
+    @ColumnInfo(name = "name")
+    private String name;
 
     //Local
     @Ignore
@@ -61,6 +64,14 @@ public class Record {
 
     public void setPoints(List<Point> points) {
         this.points = points;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public static class TypeConverter {

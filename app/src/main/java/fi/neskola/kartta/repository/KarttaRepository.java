@@ -2,6 +2,7 @@ package fi.neskola.kartta.repository;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.room.Room;
 
@@ -33,11 +34,21 @@ public class KarttaRepository {
         return mRecords;
     }
 
-    // You must call this on a non-UI thread or your app will throw an exception. Room ensures
-    // that you're not doing any long running operations on the main thread, blocking the UI.
-    void insert(Point point) {
+    void insertPointWithRecord(Record record, Point point){
         Executor.execute(() -> {
-            database.pointDao().insert(point);
+            long result = database.recordDao().insert(record);
+            if (result > 0) {
+                point.setFk_record_id(result);
+                database.pointDao().insert(point);
+            }
         });
+    }
+
+    public void saveTargetToDb(String name, double latitude, double longitude) {
+        Record record = new Record();
+        record.setName(name);
+        record.setType(Record.Type.TARGET);
+        Point point = new Point(latitude, longitude);
+        insertPointWithRecord(record, point);
     }
 }

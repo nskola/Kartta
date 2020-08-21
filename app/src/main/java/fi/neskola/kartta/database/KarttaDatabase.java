@@ -17,7 +17,7 @@ import fi.neskola.kartta.BuildConfig;
 import fi.neskola.kartta.models.Point;
 import fi.neskola.kartta.models.Record;
 
-@Database(entities = {Point.class, Record.class}, version = 3, exportSchema = false)
+@Database(entities = {Point.class, Record.class}, version = 5, exportSchema = false)
 @TypeConverters({Record.TypeConverter.class})
 public abstract class KarttaDatabase extends RoomDatabase {
 
@@ -25,35 +25,13 @@ public abstract class KarttaDatabase extends RoomDatabase {
     public abstract RecordDao recordDao();
 
     public static KarttaDatabase buildDataBase(Context applicationContext) {
-         KarttaDatabase database = Room.databaseBuilder(applicationContext,
+         return Room.databaseBuilder(applicationContext,
                 KarttaDatabase.class,
                 "kartta_database")
                 .fallbackToDestructiveMigration()
                 .addCallback(KarttaDatabase.sRoomDatabaseOnCreateCallback)
                 .build();
-
-        KarttaDatabase.addTestData(database);
-        return database;
     }
-
-    public static void addTestData(KarttaDatabase karttaDatabase) {
-            Executor.execute(() -> {
-                // Populate the database in the background.
-                RecordDao recordDao = karttaDatabase.recordDao();
-                PointDao pointDao = karttaDatabase.pointDao();
-
-                recordDao.deleteAll();
-                pointDao.deleteAll();
-
-                Record record = new Record();
-                record.setId(1);
-                record.setType(Record.Type.TARGET);
-                Point point = new Point(1,1);
-                point.setFk_record_id(1);
-                long result = recordDao.insert(record);
-                pointDao.insert(point);
-            });
-        }
 
     public static RoomDatabase.Callback sRoomDatabaseOnCreateCallback = new RoomDatabase.Callback() {
         @Override
@@ -61,7 +39,7 @@ public abstract class KarttaDatabase extends RoomDatabase {
             if (BuildConfig.DEBUG) {
                 db.disableWriteAheadLogging();
             }
-            super.onCreate(db);
+            super.onOpen(db);
         }
     };
 

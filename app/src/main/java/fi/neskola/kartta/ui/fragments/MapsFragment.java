@@ -2,6 +2,8 @@ package fi.neskola.kartta.ui.fragments;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -19,6 +21,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -26,25 +30,47 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import javax.inject.Inject;
 
 import fi.neskola.kartta.R;
+import fi.neskola.kartta.application.KarttaApplication;
+import fi.neskola.kartta.repository.KarttaRepository;
+import fi.neskola.kartta.viewmodels.MapsViewModel;
 
 public class MapsFragment extends Fragment {
 
+    @Inject
+    MapsViewModel mapsViewModel;
+
+    @Inject
+    KarttaRepository karttaRepository;
+
     GoogleMap googleMap;
+
+    BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
+    ConstraintLayout bottomSheet;
+    View backgroundDimmer;
+    EditText bottomSheetEditTextName;
+    Button bottomSheetSaveButton;
+    Button bottomSheetCancelButton;
+    ExtendedFloatingActionButton markPointButton;
+    ExtendedFloatingActionButton drawRouteButton;
+    FloatingActionButton mainFAB;
+
+    private boolean isFABOpen = false;
+
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (googleMap == null)
                 return;
-
-            if ("location_fix".equals(intent.getAction())) {
-
-            }
-            if ("set_mark_center".equals(intent.getAction())) {
-                updateMarkCenter();
-            }
+            if ("location_fix".equals(intent.getAction())) {}
         }
     };
 
@@ -75,6 +101,13 @@ public class MapsFragment extends Fragment {
     };
 
     @Override
+    public void onAttach(Context context) {
+        //Dagger inject
+        ((KarttaApplication) context.getApplicationContext()).getComponent().inject(this);
+        super.onAttach(context);
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
@@ -85,7 +118,48 @@ public class MapsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_maps, container, false);
+        View view = inflater.inflate(R.layout.fragment_maps, container, false);
+        backgroundDimmer = view.findViewById(R.id.background_dimmer);
+        bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        bottomSheetSaveButton = view.findViewById(R.id.bottom_sheet_save_button);
+        bottomSheetCancelButton = view.findViewById(R.id.bottom_sheet_cancel_button);
+        bottomSheetEditTextName = view.findViewById(R.id.bottom_sheet_edittext_name);
+        mainFAB =  view.findViewById(R.id.fab);
+        markPointButton = view.findViewById(R.id.sub_fab1);
+        drawRouteButton =  view.findViewById(R.id.sub_fab2);
+
+        //Start shrinked
+        markPointButton.setExtended(false);
+        drawRouteButton.setExtended(false);
+
+        mainFAB.setOnClickListener( (v) -> {
+            if (!isFABOpen) {
+                showFABMenu();
+            } else {
+                closeFABMenu();
+            }
+        });
+
+        markPointButton.setOnClickListener((v) ->  {
+            setTempMarkerToCenter();
+            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+            backgroundDimmer.setVisibility(View.VISIBLE);
+            hideFABs();
+        });
+
+        bottomSheetSaveButton.setOnClickListener( (v) -> {
+            mapsViewModel.getTempMarker().setTitle(bottomSheetEditTextName.getText().toString());
+            mapsViewModel.saveTempMarker();
+            setNormalState();
+        });
+
+        bottomSheetCancelButton.setOnClickListener( (v) -> {
+            mapsViewModel.removeTempMarker();
+            setNormalState();
+        });
+
+       return view;
     }
 
     @Override
@@ -109,7 +183,6 @@ public class MapsFragment extends Fragment {
         super.onResume();
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction("location_fix");
-        intentFilter.addAction("set_mark_center");
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver,intentFilter);
     }
 
@@ -135,13 +208,47 @@ public class MapsFragment extends Fragment {
                 REQUEST_FINE_LOCATION);
     }
 
-    public void updateMarkCenter() {
+    public void setTempMarkerToCenter() {
         CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
-        //getMap().getMap().clear();// to remove previous marker
         MarkerOptions options = new MarkerOptions()
-                .title("test marker")
                 .position(new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude));
-        googleMap.addMarker(options);
+        Marker marker = googleMap.addMarker(options);
+        mapsViewModel.setTempMarker(marker);
     }
 
+    public void hideFABs(){
+        mainFAB.setVisibility(View.GONE);
+        markPointButton.setVisibility(View.GONE);
+        drawRouteButton.setVisibility(View.GONE);
+    }
+
+    public void showFABs(){
+        mainFAB.setVisibility(View.VISIBLE);
+        markPointButton.setVisibility(View.VISIBLE);
+        drawRouteButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showFABMenu(){
+        isFABOpen=true;
+        markPointButton.extend();
+        drawRouteButton.extend();
+        markPointButton.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
+        drawRouteButton.animate().translationY(-getResources().getDimension(R.dimen.standard_105));
+    }
+
+    private void closeFABMenu(){
+        isFABOpen=false;
+        drawRouteButton.shrink();
+        markPointButton.shrink();
+        markPointButton.animate().translationY(0);
+        drawRouteButton.animate().translationY(0);
+    }
+
+    private void setNormalState(){
+        backgroundDimmer.setVisibility(View.INVISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        closeFABMenu();
+        showFABs();
+    }
+    
 }

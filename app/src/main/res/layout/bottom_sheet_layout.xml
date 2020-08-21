@@ -3,12 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/bottom_sheet"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="180dp"
     android:background="#ffffff"
     android:paddingBottom="12dp"
-    app:behavior_hideable="false"
-    app:behavior_peekHeight="12dp"
-    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+    app:behavior_hideable="true"
+    app:behavior_peekHeight="100dp"
+    app:behavior_draggable="false"
+
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+    app:layout_insetEdge="bottom">
 
     <ImageView
         android:id="@+id/point_icon_imageview"
@@ -22,13 +25,13 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/textView"
+        android:id="@+id/bottom_sheet_edittext_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginLeft="8dp"
-        android:text=""
         android:hint="Name of point"
+        android:text=""
         android:textColor="#292929"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/point_icon_imageview"
@@ -45,7 +48,7 @@
         android:textColor="#292929"
         android:textSize="14sp"
         app:layout_constraintStart_toEndOf="@+id/point_icon_imageview"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/bottom_sheet_edittext_name" />
 
     <TextView
         android:id="@+id/latitude_value"
@@ -56,8 +59,8 @@
         android:text=""
         android:textColor="#292929"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@+id/latitude_title"
-        app:layout_constraintBottom_toBottomOf="@id/latitude_title"/>
+        app:layout_constraintBottom_toBottomOf="@id/latitude_title"
+        app:layout_constraintStart_toEndOf="@+id/latitude_title" />
 
     <TextView
         android:id="@+id/longitude_title"
@@ -80,8 +83,8 @@
         android:text=""
         android:textColor="#292929"
         android:textSize="14sp"
-        app:layout_constraintStart_toEndOf="@+id/longitude_title"
-        app:layout_constraintBottom_toBottomOf="@id/longitude_title"/>
+        app:layout_constraintBottom_toBottomOf="@id/longitude_title"
+        app:layout_constraintStart_toEndOf="@+id/longitude_title" />
 
     <View
         android:id="@+id/separator"
@@ -95,8 +98,9 @@
         app:layout_constraintTop_toBottomOf="@+id/longitude_title" />
 
     <Button
+        android:id="@+id/bottom_sheet_cancel_button"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="48dp"
         android:layout_marginStart="24dp"
         android:layout_marginLeft="24dp"
         android:layout_marginTop="24dp"
@@ -105,8 +109,9 @@
         app:layout_constraintTop_toBottomOf="@+id/longitude_title" />
 
     <Button
+        android:id="@+id/bottom_sheet_save_button"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="48dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
