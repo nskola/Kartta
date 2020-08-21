@@ -3,7 +3,6 @@ package fi.neskola.kartta.ui.fragments;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -44,6 +43,8 @@ import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.viewmodels.MapsViewModel;
 
 public class MapsFragment extends Fragment {
+
+
 
     @Inject
     MapsViewModel mapsViewModel;
@@ -94,9 +95,28 @@ public class MapsFragment extends Fragment {
             if(checkPermissions()) {
                 googleMap.setMyLocationEnabled(true);
             }
-            LatLng sydney = new LatLng(-34, 151);
+
+            mapsViewModel.getViewState().observeForever((state) -> {
+                if (MapsViewModel.ViewState.State.VIEW_MAP == state.state_name) {
+                    closeBottomSheet();
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(state.focused_point));
+                } else if (MapsViewModel.ViewState.State.NEW_TARGET == state.state_name) {
+                    MarkerOptions options = new MarkerOptions()
+                            .position(state.focused_point);
+                    Marker marker = googleMap.addMarker(options);
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                    backgroundDimmer.setVisibility(View.VISIBLE);
+                    hideFABs();
+                } else if (MapsViewModel.ViewState.State.VIEW_TARGET == state.state_name) {
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(state.focused_point));
+                    closeBottomSheet();
+                }
+            });
+            //mapsViewModel.getGetState().postValue(mapsViewModel.getGetState().getValue());
+
+            /*LatLng sydney = new LatLng(-34, 151);
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
         }
     };
 
@@ -142,21 +162,19 @@ public class MapsFragment extends Fragment {
         });
 
         markPointButton.setOnClickListener((v) ->  {
-            setTempMarkerToCenter();
-            bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-            backgroundDimmer.setVisibility(View.VISIBLE);
-            hideFABs();
+            CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
+            LatLng latLng = new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude);
+            mapsViewModel.onMarkTargetButtonClicked(latLng);
         });
 
         bottomSheetSaveButton.setOnClickListener( (v) -> {
-            mapsViewModel.getTempMarker().setTitle(bottomSheetEditTextName.getText().toString());
-            mapsViewModel.saveTempMarker();
-            setNormalState();
+            mapsViewModel.onTargetSaveClicked(bottomSheetEditTextName.getText().toString());
         });
 
         bottomSheetCancelButton.setOnClickListener( (v) -> {
-            mapsViewModel.removeTempMarker();
-            setNormalState();
+            mapsViewModel.onTargetSaveCancelClicked();
+            //mapsViewModel.removeTempMarker();
+            //setNormalState();
         });
 
        return view;
@@ -170,6 +188,7 @@ public class MapsFragment extends Fragment {
         if (mapFragment != null) {
             mapFragment.getMapAsync(callback);
         }
+
     }
 
     @Override
@@ -213,7 +232,8 @@ public class MapsFragment extends Fragment {
         MarkerOptions options = new MarkerOptions()
                 .position(new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude));
         Marker marker = googleMap.addMarker(options);
-        mapsViewModel.setTempMarker(marker);
+
+        //mapsViewModel.setTempMarker(marker);
     }
 
     public void hideFABs(){
@@ -250,5 +270,17 @@ public class MapsFragment extends Fragment {
         closeFABMenu();
         showFABs();
     }
-    
+
+    private void closeBottomSheet(){
+        backgroundDimmer.setVisibility(View.INVISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        closeFABMenu();
+        showFABs();
+    }
+
+    //TODO jatka
+    private void jokuOnClickEvent() {
+        //viewmodel.jokuOnClickEvent paitsi jos silkka ui action ilman mitään business lokiikkaa
+    }
+
 }
