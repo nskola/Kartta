@@ -35,20 +35,22 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
+import fi.neskola.kartta.models.Point;
+import fi.neskola.kartta.models.Record;
 import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.viewmodels.MapsViewModel;
 
 public class MapsFragment extends Fragment {
 
-
-
     @Inject
     MapsViewModel mapsViewModel;
-
     @Inject
     KarttaRepository karttaRepository;
 
@@ -97,13 +99,19 @@ public class MapsFragment extends Fragment {
             }
 
             mapsViewModel.getViewState().observeForever((state) -> {
+
+                if (state == null)
+                    return;
+
+                addMarkers(state);
+
                 if (MapsViewModel.ViewState.State.VIEW_MAP == state.state_name) {
                     closeBottomSheet();
                     googleMap.moveCamera(CameraUpdateFactory.newLatLng(state.focused_point));
                 } else if (MapsViewModel.ViewState.State.NEW_TARGET == state.state_name) {
                     MarkerOptions options = new MarkerOptions()
                             .position(state.focused_point);
-                    Marker marker = googleMap.addMarker(options);
+                    googleMap.addMarker(options);
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                     backgroundDimmer.setVisibility(View.VISIBLE);
                     hideFABs();
@@ -112,11 +120,6 @@ public class MapsFragment extends Fragment {
                     closeBottomSheet();
                 }
             });
-            //mapsViewModel.getGetState().postValue(mapsViewModel.getGetState().getValue());
-
-            /*LatLng sydney = new LatLng(-34, 151);
-            googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-            googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));*/
         }
     };
 
@@ -173,8 +176,7 @@ public class MapsFragment extends Fragment {
 
         bottomSheetCancelButton.setOnClickListener( (v) -> {
             mapsViewModel.onTargetSaveCancelClicked();
-            //mapsViewModel.removeTempMarker();
-            //setNormalState();
+
         });
 
        return view;
@@ -227,15 +229,6 @@ public class MapsFragment extends Fragment {
                 REQUEST_FINE_LOCATION);
     }
 
-    public void setTempMarkerToCenter() {
-        CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
-        MarkerOptions options = new MarkerOptions()
-                .position(new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude));
-        Marker marker = googleMap.addMarker(options);
-
-        //mapsViewModel.setTempMarker(marker);
-    }
-
     public void hideFABs(){
         mainFAB.setVisibility(View.GONE);
         markPointButton.setVisibility(View.GONE);
@@ -264,13 +257,6 @@ public class MapsFragment extends Fragment {
         drawRouteButton.animate().translationY(0);
     }
 
-    private void setNormalState(){
-        backgroundDimmer.setVisibility(View.INVISIBLE);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-        closeFABMenu();
-        showFABs();
-    }
-
     private void closeBottomSheet(){
         backgroundDimmer.setVisibility(View.INVISIBLE);
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
@@ -278,9 +264,23 @@ public class MapsFragment extends Fragment {
         showFABs();
     }
 
-    //TODO jatka
-    private void jokuOnClickEvent() {
-        //viewmodel.jokuOnClickEvent paitsi jos silkka ui action ilman mitään business lokiikkaa
+    private void addMarkers(MapsViewModel.ViewState state) {
+        googleMap.clear();
+        for (Record record : state.recordList) {
+            switch (record.getType()) {
+                case TARGET:
+                    MarkerOptions markerOptions = new MarkerOptions().title(record.getName());
+                    for (Point point : record.getPoints()) {
+                        markerOptions.position(point.getLatLng());
+                    }
+                    googleMap.addMarker(markerOptions);
+                    break;
+                case TRACK:
+
+                default:
+                    break;
+            }
+        }
     }
 
 }

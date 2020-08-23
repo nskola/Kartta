@@ -6,6 +6,7 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = "records")
@@ -40,7 +41,11 @@ public class Record {
 
     //Local
     @Ignore
-    private List<Point> points;
+    private List<Point> points = new ArrayList<>();
+
+    public Record(String name) {
+        this.name = name;
+    }
 
     public long getId() {
         return id;
@@ -64,6 +69,10 @@ public class Record {
 
     public void setPoints(List<Point> points) {
         this.points = points;
+    }
+
+    public void addPoint(Point point){
+        points.add(point);
     }
 
     public String getName() {

@@ -1,7 +1,10 @@
 package fi.neskola.kartta.models;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+
+import com.google.android.gms.maps.model.LatLng;
 
 @Entity(tableName = "points")
 public class Point {
@@ -23,6 +26,16 @@ public class Point {
     public Point(double latitude, double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    @Ignore
+    public Point(LatLng latLng) {
+        this.latitude = latLng.latitude;
+        this.longitude = latLng.longitude;
+    }
+
+    public LatLng getLatLng(){
+        return new LatLng(latitude,longitude);
     }
 
     public long getId() {

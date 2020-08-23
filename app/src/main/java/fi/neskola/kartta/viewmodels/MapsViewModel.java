@@ -3,23 +3,21 @@ package fi.neskola.kartta.viewmodels;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import fi.neskola.kartta.models.Point;
+import fi.neskola.kartta.models.Record;
 import fi.neskola.kartta.repository.KarttaRepository;
 
 @Singleton
 public class MapsViewModel {
 
-    Marker tempMarker;
-
-    //List<Marker> markers = new ArrayList<>();
-
-    MutableLiveData<ViewState> viewState = new MutableLiveData<>();
-
-    MutableLiveData<ActionState> actionState = new MutableLiveData<>();
+    private MutableLiveData<ViewState> viewState = new MutableLiveData<>();
 
     private final KarttaRepository karttaRepository;
 
@@ -27,24 +25,6 @@ public class MapsViewModel {
     public MapsViewModel(KarttaRepository karttaRepository) {
         this.karttaRepository = karttaRepository;
         viewState.setValue(new ViewState());
-    }
-
-    public void setTempMarker(Marker marker) {
-        tempMarker = marker;
-    }
-
-    public void saveTempMarker(){
-        LatLng latLng = tempMarker.getPosition();
-        karttaRepository.saveTargetToDb(tempMarker.getTitle(), latLng.latitude, latLng.longitude);
-    }
-
-    public void removeTempMarker(){
-        tempMarker.remove();
-        tempMarker = null;
-    }
-
-    public Marker getTempMarker() {
-        return tempMarker;
     }
 
     public MutableLiveData<ViewState> getViewState() {
@@ -56,16 +36,14 @@ public class MapsViewModel {
 
         public State state_name = State.VIEW_MAP;
         public LatLng focused_point = new LatLng(50,40);
-        //public Marker tempMarker = null;
-    }
-
-    public static class ActionState {
-        public enum State {CHOOSE_MAP_ACTION}
-        public State state = State.CHOOSE_MAP_ACTION;
+        public List<Record> recordList =  new ArrayList<>();
     }
 
     public void onMarkTargetButtonClicked(LatLng latLng){
-        ViewState nameNewTargetState = new ViewState();
+        ViewState oldState = viewState.getValue();
+        if (oldState == null)
+            throw new IllegalStateException("Old state was null");
+        ViewState nameNewTargetState = copyViewStateFromOld(oldState);
         nameNewTargetState.state_name = ViewState.State.NEW_TARGET;
         nameNewTargetState.focused_point = latLng;
         viewState.setValue(nameNewTargetState);
@@ -76,11 +54,14 @@ public class MapsViewModel {
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         LatLng latLng = oldState.focused_point;
-        karttaRepository.saveTargetToDb(targetName, latLng.latitude, latLng.longitude);
+        Record record = new Record(targetName);
+        record.setType(Record.Type.TARGET);
+        record.addPoint(new Point(latLng));
+        karttaRepository.saveRecordToDb(record);
 
-        ViewState viewTargetState = new ViewState();
+        ViewState viewTargetState = copyViewStateFromOld(oldState);
         viewTargetState.state_name = ViewState.State.VIEW_TARGET;
-        viewTargetState.focused_point = latLng;
+        viewTargetState.recordList.add(record);
         viewState.setValue(viewTargetState);
     }
 
@@ -88,14 +69,17 @@ public class MapsViewModel {
         ViewState oldState = viewState.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
-        LatLng latLng = oldState.focused_point;
-
-        ViewState viewTargetState = new ViewState();
-        viewTargetState.state_name = ViewState.State.VIEW_MAP;
-        viewTargetState.focused_point = latLng;
-        viewState.setValue(viewTargetState);
+        ViewState viewState = copyViewStateFromOld(oldState);
+        viewState.state_name = ViewState.State.VIEW_MAP;
+        this.viewState.setValue(viewState);
     }
 
-
+    private static ViewState copyViewStateFromOld(ViewState oldViewState) {
+        ViewState newViewState = new ViewState();
+        newViewState.focused_point = oldViewState.focused_point;
+        newViewState.state_name = oldViewState.state_name;
+        newViewState.recordList.addAll(oldViewState.recordList);
+        return newViewState;
+    }
 
 }

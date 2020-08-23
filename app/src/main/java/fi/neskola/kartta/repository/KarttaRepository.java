@@ -44,11 +44,14 @@ public class KarttaRepository {
         });
     }
 
-    public void saveTargetToDb(String name, double latitude, double longitude) {
-        Record record = new Record();
-        record.setName(name);
-        record.setType(Record.Type.TARGET);
-        Point point = new Point(latitude, longitude);
-        insertPointWithRecord(record, point);
+    public void saveRecordToDb(Record record) {
+        switch (record.getType()) {
+            case TARGET:
+                Point point = record.getPoints().get(0);
+                insertPointWithRecord(record, point);
+                break;
+            default:
+                break;
+        }
     }
 }
