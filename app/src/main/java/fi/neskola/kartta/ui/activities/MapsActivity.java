@@ -2,10 +2,7 @@ package fi.neskola.kartta.ui.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -13,11 +10,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 
-import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 
 import javax.inject.Inject;
@@ -26,7 +19,7 @@ import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.services.LocationService;
-import fi.neskola.kartta.viewmodels.MapsViewModel;
+import fi.neskola.kartta.viewmodels.KarttaViewModel;
 
 public class MapsActivity extends AppCompatActivity{
 
@@ -34,7 +27,7 @@ public class MapsActivity extends AppCompatActivity{
     public KarttaRepository karttaRepository;
 
     @Inject
-    MapsViewModel mapsViewModel;
+    KarttaViewModel karttaViewModel;
 
     private AppBarConfiguration mAppBarConfiguration;
 

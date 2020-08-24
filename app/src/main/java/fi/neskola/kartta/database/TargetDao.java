@@ -7,18 +7,18 @@ import androidx.room.Query;
 
 import java.util.List;
 
-import fi.neskola.kartta.models.Record;
+import fi.neskola.kartta.models.Target;
 
 @Dao
-public interface RecordDao {
+public interface TargetDao {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    long insert(Record record);
+    long insert(Target target);
 
-    @Query("DELETE FROM records")
+    @Query("DELETE FROM targets")
     void deleteAll();
 
-    @Query("SELECT * from records ORDER BY record_id ASC")
-    List<Record> getAllRecords();
+    @Query("SELECT * from targets ORDER BY target_id ASC")
+    List<Target> getAllRecords();
 
 }

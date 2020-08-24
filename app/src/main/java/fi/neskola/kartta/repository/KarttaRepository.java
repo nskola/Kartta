@@ -1,10 +1,10 @@
 package fi.neskola.kartta.repository;
 
-import android.app.Application;
-import android.content.Context;
-import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
 
-import androidx.room.Room;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
@@ -13,45 +13,42 @@ import javax.inject.Singleton;
 
 import fi.neskola.kartta.database.Executor;
 import fi.neskola.kartta.database.KarttaDatabase;
-import fi.neskola.kartta.database.PointDao;
-import fi.neskola.kartta.database.RecordDao;
 import fi.neskola.kartta.models.Point;
-import fi.neskola.kartta.models.Record;
+import fi.neskola.kartta.models.Target;
 
 @Singleton
 public class KarttaRepository {
 
+    public interface Callback {
+        void result(Target target);
+        //TODO: void error()
+    }
+
     KarttaDatabase database;
 
-    private List<Record> mRecords;
+    MutableLiveData<List<Target>> targets = new MutableLiveData<>();
 
     @Inject
     public KarttaRepository(KarttaDatabase database) {
         this.database = database;
     }
 
-    List<Record> getAllRecords() {
-        return mRecords;
+    LiveData<List<Target>> getTargets() {
+        return targets;
     }
 
-    void insertPointWithRecord(Record record, Point point){
+    public void insertTarget(Target target, Callback callback){
         Executor.execute(() -> {
-            long result = database.recordDao().insert(record);
-            if (result > 0) {
-                point.setFk_record_id(result);
-                database.pointDao().insert(point);
+            long id = database.recordDao().insert(target);
+            if (id > 0) {
+                target.setId(id);
+                Point point = target.getPoint();
+                point.setParent_id(id);
+                long pointId = database.pointDao().insert(point);
+                point.setId(pointId);
+                new Handler(Looper.getMainLooper()).post(() -> callback.result(target));
             }
         });
     }
 
-    public void saveRecordToDb(Record record) {
-        switch (record.getType()) {
-            case TARGET:
-                Point point = record.getPoints().get(0);
-                insertPointWithRecord(record, point);
-                break;
-            default:
-                break;
-        }
-    }
 }

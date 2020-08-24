@@ -13,9 +13,8 @@ public class Point {
     @ColumnInfo(name = "point_id")
     private long id;
 
-    //foreign key
-    @ColumnInfo(name = "fk_record_id")
-    private long fk_record_id;
+    @ColumnInfo(name = "parent_id")
+    private long parent_id;
 
     @ColumnInfo(name = "latitude")
     private double latitude;
@@ -62,11 +61,11 @@ public class Point {
         this.longitude = longitude;
     }
 
-    public long getFk_record_id() {
-        return fk_record_id;
+    public long getParent_id() {
+        return parent_id;
     }
 
-    public void setFk_record_id(long fk_record_id) {
-        this.fk_record_id = fk_record_id;
+    public void setParent_id(long parent_id) {
+        this.parent_id = parent_id;
     }
 }

@@ -14,7 +14,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".ui.fragments.MapsFragment" />
+        tools:context=".ui.fragments.KarttaFragment" />
 
     <View
         android:id="@+id/background_dimmer"

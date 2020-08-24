@@ -1,6 +1,5 @@
 package fi.neskola.kartta.database;
 
-import android.app.Application;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -10,19 +9,15 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import fi.neskola.kartta.BuildConfig;
 import fi.neskola.kartta.models.Point;
-import fi.neskola.kartta.models.Record;
+import fi.neskola.kartta.models.Target;
 
-@Database(entities = {Point.class, Record.class}, version = 5, exportSchema = false)
-@TypeConverters({Record.TypeConverter.class})
+@Database(entities = {Point.class, Target.class}, version = 6, exportSchema = false)
 public abstract class KarttaDatabase extends RoomDatabase {
 
     public abstract PointDao pointDao();
-    public abstract RecordDao recordDao();
+    public abstract TargetDao recordDao();
 
     public static KarttaDatabase buildDataBase(Context applicationContext) {
          return Room.databaseBuilder(applicationContext,

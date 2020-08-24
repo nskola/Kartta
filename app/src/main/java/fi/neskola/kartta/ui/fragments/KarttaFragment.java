@@ -15,14 +15,18 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,24 +39,22 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 
 import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.models.Point;
-import fi.neskola.kartta.models.Record;
-import fi.neskola.kartta.repository.KarttaRepository;
-import fi.neskola.kartta.viewmodels.MapsViewModel;
+import fi.neskola.kartta.models.Target;
+import fi.neskola.kartta.viewmodels.KarttaViewModel;
 
-public class MapsFragment extends Fragment {
+import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.NEW_TARGET;
+import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.VIEW_MAP;
+import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.VIEW_TARGET;
+
+public class KarttaFragment extends Fragment {
 
     @Inject
-    MapsViewModel mapsViewModel;
-    @Inject
-    KarttaRepository karttaRepository;
+    KarttaViewModel karttaViewModel;
 
     GoogleMap googleMap;
 
@@ -60,6 +62,7 @@ public class MapsFragment extends Fragment {
     ConstraintLayout bottomSheet;
     View backgroundDimmer;
     EditText bottomSheetEditTextName;
+    TextView bottomSheetTextViewLatitude, bottomSheetTextViewLongitude;
     Button bottomSheetSaveButton;
     Button bottomSheetCancelButton;
     ExtendedFloatingActionButton markPointButton;
@@ -67,13 +70,22 @@ public class MapsFragment extends Fragment {
     FloatingActionButton mainFAB;
 
     private boolean isFABOpen = false;
+    private LatLng lastUserLocation;
 
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (googleMap == null)
                 return;
-            if ("location_fix".equals(intent.getAction())) {}
+            if ("location_fix".equals(intent.getAction())) {
+                Bundle extras = intent.getExtras();
+                if (extras == null)
+                    return;
+                long latitude = extras.getLong("latitude", -1);
+                long longitude = extras.getLong("longitude", -1);
+                if (latitude != -1)
+                    lastUserLocation = new LatLng(latitude, longitude);
+            }
         }
     };
 
@@ -81,43 +93,55 @@ public class MapsFragment extends Fragment {
     
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
-        /**
-         * Manipulates the map once available.
-         * This callback is triggered when the map is ready to be used.
-         * This is where we can add markers or lines, add listeners or move the camera.
-         * In this case, we just add a marker near Sydney, Australia.
-         * If Google Play services is not installed on the device, the user will be prompted to
-         * install it inside the SupportMapFragment. This method will only be triggered once the
-         * user has installed Google Play services and returned to the app.
-         */
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            MapsFragment.this.googleMap = googleMap;
+            KarttaFragment.this.googleMap = googleMap;
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
             if(checkPermissions()) {
                 googleMap.setMyLocationEnabled(true);
             }
 
-            mapsViewModel.getViewState().observeForever((state) -> {
+            googleMap.setOnMarkerClickListener((marker) -> {
+                long id = (long) marker.getTag();
+                karttaViewModel.onMarkerClicked(id);
+                return false;
+            });
 
-                if (state == null)
+            googleMap.setOnMapClickListener((latLng) -> karttaViewModel.onMapClicked());
+
+            karttaViewModel.getViewState().observeForever((viewState) -> {
+                if (viewState == null)
                     return;
 
-                addMarkers(state);
+                addMarkers(viewState);
 
-                if (MapsViewModel.ViewState.State.VIEW_MAP == state.state_name) {
+                if (VIEW_MAP == viewState.stateName) {
                     closeBottomSheet();
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(state.focused_point));
-                } else if (MapsViewModel.ViewState.State.NEW_TARGET == state.state_name) {
+                    LatLng center = viewState.center;
+                    if (center != null)
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLng(center));
+                } else if (NEW_TARGET == viewState.stateName) {
+                    bottomSheetEditTextName.getText().clear();
+                    bottomSheetEditTextName.setInputType(InputType.TYPE_CLASS_TEXT);
+                    bottomSheetEditTextName.requestFocus();
+                    bottomSheetTextViewLatitude.setText(String.valueOf(viewState.center.latitude));
+                    bottomSheetTextViewLongitude.setText(String.valueOf(viewState.center.longitude));
                     MarkerOptions options = new MarkerOptions()
-                            .position(state.focused_point);
+                            .position(viewState.center);
                     googleMap.addMarker(options);
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                     backgroundDimmer.setVisibility(View.VISIBLE);
                     hideFABs();
-                } else if (MapsViewModel.ViewState.State.VIEW_TARGET == state.state_name) {
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(state.focused_point));
-                    closeBottomSheet();
+                } else if (VIEW_TARGET == viewState.stateName) {
+                    Target target = viewState.focusedTarget;
+                    bottomSheetEditTextName.clearFocus();
+                    bottomSheetEditTextName.setInputType(InputType.TYPE_NULL);
+                    bottomSheetEditTextName.getText().clear();
+                    bottomSheetTextViewLatitude.setText(String.valueOf(target.getPoint().getLatitude()));
+                    bottomSheetTextViewLongitude.setText(String.valueOf(target.getPoint().getLongitude()));
+                    bottomSheetEditTextName.getText().append(viewState.focusedTarget.getName());
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(viewState.focusedTarget.getPoint().getLatLng()));
+                    peekBottomSheet();
                 }
             });
         }
@@ -148,6 +172,8 @@ public class MapsFragment extends Fragment {
         bottomSheetSaveButton = view.findViewById(R.id.bottom_sheet_save_button);
         bottomSheetCancelButton = view.findViewById(R.id.bottom_sheet_cancel_button);
         bottomSheetEditTextName = view.findViewById(R.id.bottom_sheet_edittext_name);
+        bottomSheetTextViewLatitude = view.findViewById(R.id.latitude_value);
+        bottomSheetTextViewLongitude = view.findViewById(R.id.longitude_value);
         mainFAB =  view.findViewById(R.id.fab);
         markPointButton = view.findViewById(R.id.sub_fab1);
         drawRouteButton =  view.findViewById(R.id.sub_fab2);
@@ -167,15 +193,15 @@ public class MapsFragment extends Fragment {
         markPointButton.setOnClickListener((v) ->  {
             CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
             LatLng latLng = new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude);
-            mapsViewModel.onMarkTargetButtonClicked(latLng);
+            karttaViewModel.onAddTargetButtonClicked(latLng);
         });
 
         bottomSheetSaveButton.setOnClickListener( (v) -> {
-            mapsViewModel.onTargetSaveClicked(bottomSheetEditTextName.getText().toString());
+            karttaViewModel.onTargetSaveClicked(bottomSheetEditTextName.getText().toString());
         });
 
         bottomSheetCancelButton.setOnClickListener( (v) -> {
-            mapsViewModel.onTargetSaveCancelClicked();
+            karttaViewModel.onTargetSaveCancelClicked();
 
         });
 
@@ -197,6 +223,18 @@ public class MapsFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.map_fragment_toolbar_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.focus_to_user_location:
+                if (lastUserLocation != null)
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(lastUserLocation));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -264,23 +302,26 @@ public class MapsFragment extends Fragment {
         showFABs();
     }
 
-    private void addMarkers(MapsViewModel.ViewState state) {
-        googleMap.clear();
-        for (Record record : state.recordList) {
-            switch (record.getType()) {
-                case TARGET:
-                    MarkerOptions markerOptions = new MarkerOptions().title(record.getName());
-                    for (Point point : record.getPoints()) {
-                        markerOptions.position(point.getLatLng());
-                    }
-                    googleMap.addMarker(markerOptions);
-                    break;
-                case TRACK:
+    private void peekBottomSheet(){
+        backgroundDimmer.setVisibility(View.INVISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        closeFABMenu();
+        showFABs();
+    }
 
-                default:
-                    break;
+    private void addMarkers(KarttaViewModel.ViewState state) {
+        googleMap.clear();
+        for (Target target : state.targetList) {
+            MarkerOptions markerOptions = new MarkerOptions().title(target.getName());
+            Point point = target.getPoint();
+            markerOptions.position(point.getLatLng());
+            Marker marker = googleMap.addMarker(markerOptions);
+            marker.setTag(target.getId());
+            if (state.stateName == VIEW_TARGET && state.focusedTarget.equals(target)) {
+                marker.showInfoWindow();
             }
         }
+
     }
 
 }

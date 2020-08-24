@@ -9,7 +9,7 @@ import dagger.Module;
 import dagger.Provides;
 import fi.neskola.kartta.database.KarttaDatabase;
 import fi.neskola.kartta.database.PointDao;
-import fi.neskola.kartta.database.RecordDao;
+import fi.neskola.kartta.database.TargetDao;
 
 @Module
 public class DatabaseModule {
@@ -34,7 +34,7 @@ public class DatabaseModule {
 
     @Singleton
     @Provides
-    RecordDao providesRecordDao(KarttaDatabase karttaDatabase) {
+    TargetDao providesRecordDao(KarttaDatabase karttaDatabase) {
         return karttaDatabase.recordDao();
     }
 }
