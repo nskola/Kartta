@@ -10,6 +10,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
 import fi.neskola.kartta.models.Target;
 import fi.neskola.kartta.repository.KarttaRepository;
@@ -18,6 +19,8 @@ import fi.neskola.kartta.repository.KarttaRepository;
 public class KarttaViewModel {
 
     private MutableLiveData<ViewState> viewState = new MutableLiveData<>();
+
+    private MutableLiveData<List<IRecord>> recordList = new MutableLiveData<>();
 
     private final KarttaRepository karttaRepository;
 
@@ -41,6 +44,8 @@ public class KarttaViewModel {
                 newViewState = copyViewStateFromOld(viewState.getValue());
             newViewState.targetList.clear();
             newViewState.targetList.addAll(targets);
+            List<IRecord> recordList = new ArrayList<>(targets);
+            this.recordList.setValue(recordList);
             viewState.setValue(newViewState);
         });
 
@@ -49,6 +54,8 @@ public class KarttaViewModel {
     public MutableLiveData<ViewState> getViewState() {
         return viewState;
     }
+
+    public MutableLiveData<List<IRecord>> getRecordList() { return recordList; }
 
     public void onAddTargetButtonClicked(LatLng latLng){
         ViewState oldState = viewState.getValue();
@@ -73,6 +80,11 @@ public class KarttaViewModel {
             viewTargetState.targetList.add(newRecord);
             viewTargetState.focusedTarget = newRecord;
             viewState.setValue(viewTargetState);
+            List<IRecord> recordList = new ArrayList<>();
+            if (this.recordList.getValue() != null)
+                recordList.addAll(this.recordList.getValue());
+            recordList.add(newRecord);
+            this.recordList.setValue(recordList);
         });
     }
 

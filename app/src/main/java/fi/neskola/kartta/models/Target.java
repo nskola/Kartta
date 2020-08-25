@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(tableName = "targets")
-public class Target {
+public class Target implements IRecord {
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "target_id")
@@ -27,17 +27,26 @@ public class Target {
         this.name = name;
     }
 
+    @Override
     public long getId() {
         return id;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public RecordType getType() {
+        return RecordType.TARGET;
     }
 
     public void setId(long id) {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
-    }
+
 
     public void setName(String name) {
         this.name = name;
