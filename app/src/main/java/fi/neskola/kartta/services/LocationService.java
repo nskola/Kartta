@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.IBinder;
 import android.os.Looper;
-import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -20,11 +19,12 @@ import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.util.Locale;
-
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
 public class LocationService extends Service {
+
+    public static final String EXTRA_LATITUDE = "lat";
+    public static final String EXTRA_LONGITUDE = "lon";
 
     private LocationRequest mLocationRequest;
 
@@ -85,8 +85,8 @@ public class LocationService extends Service {
     public void onLocationChanged(Location location) {
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         Intent locationFixIntent = new Intent("location_fix");
-        locationFixIntent.putExtra("lat", latLng.latitude);
-        locationFixIntent.putExtra("lon", latLng.longitude);
+        locationFixIntent.putExtra(EXTRA_LATITUDE, latLng.latitude);
+        locationFixIntent.putExtra(EXTRA_LONGITUDE, latLng.longitude);
         LocalBroadcastManager.getInstance(this).sendBroadcast(locationFixIntent);
     }
 }

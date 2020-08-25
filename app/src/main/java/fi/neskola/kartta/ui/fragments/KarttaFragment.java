@@ -26,7 +26,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -47,6 +46,8 @@ import fi.neskola.kartta.models.Point;
 import fi.neskola.kartta.models.Target;
 import fi.neskola.kartta.viewmodels.KarttaViewModel;
 
+import static fi.neskola.kartta.services.LocationService.EXTRA_LATITUDE;
+import static fi.neskola.kartta.services.LocationService.EXTRA_LONGITUDE;
 import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.NEW_TARGET;
 import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.VIEW_MAP;
 import static fi.neskola.kartta.viewmodels.KarttaViewModel.ViewState.State.VIEW_TARGET;
@@ -81,8 +82,8 @@ public class KarttaFragment extends Fragment {
                 Bundle extras = intent.getExtras();
                 if (extras == null)
                     return;
-                long latitude = extras.getLong("latitude", -1);
-                long longitude = extras.getLong("longitude", -1);
+                double latitude = extras.getDouble(EXTRA_LATITUDE, -1);
+                double longitude = extras.getDouble(EXTRA_LONGITUDE, -1);
                 if (latitude != -1)
                     lastUserLocation = new LatLng(latitude, longitude);
             }
@@ -97,7 +98,7 @@ public class KarttaFragment extends Fragment {
         public void onMapReady(GoogleMap googleMap) {
             KarttaFragment.this.googleMap = googleMap;
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
-            if(checkPermissions()) {
+            if(checkLocationPermissions()) {
                 googleMap.setMyLocationEnabled(true);
             }
 
@@ -112,7 +113,6 @@ public class KarttaFragment extends Fragment {
             karttaViewModel.getViewState().observeForever((viewState) -> {
                 if (viewState == null)
                     return;
-
                 addMarkers(viewState);
 
                 if (VIEW_MAP == viewState.stateName) {
@@ -251,17 +251,17 @@ public class KarttaFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
     }
 
-    private boolean checkPermissions() {
+    private boolean checkLocationPermissions() {
         if (ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             return true;
         } else {
-            requestPermissions();
+            requestLocationPermission();
             return false;
         }
     }
 
-    private void requestPermissions() {
+    private void requestLocationPermission() {
         ActivityCompat.requestPermissions( getActivity(),
                 new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                 REQUEST_FINE_LOCATION);
