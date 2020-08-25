@@ -46,14 +46,19 @@ public class Target implements IRecord {
         this.id = id;
     }
 
-
-
     public void setName(String name) {
         this.name = name;
     }
 
     public Point getPoint() {
         return point;
+    }
+
+    @Override
+    public List<Point> getPoints() {
+        List<Point> pointList = new ArrayList<>();
+        pointList.add(point);
+        return pointList;
     }
 
     public void setPoint(Point point) {

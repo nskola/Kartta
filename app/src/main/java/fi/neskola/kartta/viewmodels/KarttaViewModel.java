@@ -1,10 +1,14 @@
 package fi.neskola.kartta.viewmodels;
 
+import android.icu.text.AlphabeticIndex;
+
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,40 +16,33 @@ import javax.inject.Singleton;
 
 import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
+import fi.neskola.kartta.models.RecordType;
 import fi.neskola.kartta.models.Target;
 import fi.neskola.kartta.repository.KarttaRepository;
+
+import static fi.neskola.kartta.viewmodels.ViewState.copyViewStateFromOld;
 
 @Singleton
 public class KarttaViewModel {
 
     private MutableLiveData<ViewState> viewStateObservable = new MutableLiveData<>();
 
-    private MutableLiveData<List<IRecord>> recordListObservable = new MutableLiveData<>();
-
     private final KarttaRepository karttaRepository;
-
-    public static class ViewState {
-        public enum State {VIEW_MAP, NEW_TARGET, VIEW_TARGET}
-
-        public State stateName = State.VIEW_MAP;
-        public LatLng center = new LatLng(50,40);
-        public List<Target> targetList =  new ArrayList<>();
-        public Target focusedTarget = null;
-    }
 
     @Inject
     public KarttaViewModel(KarttaRepository karttaRepository) {
         this.karttaRepository = karttaRepository;
-        karttaRepository.getTargetListObservable().observeForever(targets -> {
+        karttaRepository.getRecordListObservable().observeForever(records -> {
             ViewState newViewState;
             if (viewStateObservable.getValue() == null)
-                newViewState = new ViewState();
+                newViewState = ViewState.makeInitialState();
             else
                 newViewState = copyViewStateFromOld(viewStateObservable.getValue());
             newViewState.targetList.clear();
-            newViewState.targetList.addAll(targets);
-            List<IRecord> recordList = new ArrayList<>(targets);
-            this.recordListObservable.setValue(recordList);
+            for (IRecord record : records) {
+                if (record instanceof Target)
+                    newViewState.targetList.add((Target) record);
+            }
             viewStateObservable.setValue(newViewState);
         });
 
@@ -55,7 +52,9 @@ public class KarttaViewModel {
         return viewStateObservable;
     }
 
-    public MutableLiveData<List<IRecord>> getRecordListObservable() { return recordListObservable; }
+    public LiveData<List<IRecord>> getRecordListObservable() {
+        return karttaRepository.getRecordListObservable();
+    }
 
     public void onAddTargetButtonClicked(LatLng latLng){
         ViewState oldState = viewStateObservable.getValue();
@@ -119,12 +118,8 @@ public class KarttaViewModel {
         this.viewStateObservable.setValue(viewState);
     }
 
-    private static ViewState copyViewStateFromOld(ViewState oldViewState) {
-        ViewState newViewState = new ViewState();
-        newViewState.center = oldViewState.center;
-        newViewState.stateName = oldViewState.stateName;
-        newViewState.targetList.addAll(oldViewState.targetList);
-        newViewState.focusedTarget = oldViewState.focusedTarget;
-        return newViewState;
+    public void onMapPaused(LatLng cameraPosition) {
+        if (viewStateObservable.getValue() != null)
+            viewStateObservable.getValue().center = cameraPosition;
     }
 }

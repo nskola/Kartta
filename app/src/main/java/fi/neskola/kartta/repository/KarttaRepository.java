@@ -6,6 +6,7 @@ import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,34 +14,30 @@ import javax.inject.Singleton;
 
 import fi.neskola.kartta.database.Executor;
 import fi.neskola.kartta.database.KarttaDatabase;
+import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
 import fi.neskola.kartta.models.Target;
 
 @Singleton
 public class KarttaRepository {
 
-    public interface Callback {
-        void result(Target target);
-        //TODO: void error()
-    }
-
     public interface ListCallback {
-        void result(List<Target> targets);
+        void result(List<IRecord> records);
         //TODO: void error()
     }
 
     KarttaDatabase database;
 
-    MutableLiveData<List<Target>> targetListObservable = new MutableLiveData<>();
+    MutableLiveData<List<IRecord>> recordListObservable = new MutableLiveData<>();
 
-    public LiveData<List<Target>> getTargetListObservable() {
-        return targetListObservable;
+    public LiveData<List<IRecord>> getRecordListObservable() {
+        return recordListObservable;
     }
 
     @Inject
     public KarttaRepository(KarttaDatabase database) {
         this.database = database;
-        getTargets((targets -> targetListObservable.setValue(targets)));
+        getRecords((targets -> recordListObservable.setValue(targets)));
     }
 
     public void insertTarget(Target target){
@@ -51,23 +48,27 @@ public class KarttaRepository {
                 Point point = target.getPoint();
                 point.setParent_id(id);
                 database.pointDao().insert(point);
-                getTargetsAndEmitResult();
+                getRecordsAndEmitResult();
             }
         });
     }
 
-    private void getTargets(ListCallback callback){
+    private void getRecords(ListCallback callback){
         Executor.execute(() -> {
+            List<IRecord> records = new ArrayList<>();
+
             List<Target> targets = database.targetDao().getAllTargets();
             for (Target target : targets) {
                 target.setPoint(database.pointDao().getPointForTarget(target.getId()));
             }
-            new Handler(Looper.getMainLooper()).post(() -> callback.result(targets));
+            records.addAll(targets);
+
+            new Handler(Looper.getMainLooper()).post(() -> callback.result(records));
         });
     }
 
-    private void getTargetsAndEmitResult(){
-        getTargets((targets -> targetListObservable.setValue(targets)));
+    private void getRecordsAndEmitResult(){
+        getRecords((targets -> recordListObservable.setValue(targets)));
     }
 
 }

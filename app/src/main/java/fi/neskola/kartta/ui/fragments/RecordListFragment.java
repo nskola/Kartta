@@ -45,11 +45,13 @@ public class RecordListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerViewAdapter = new RecordListRecyclerViewAdapter(view.getContext(), recordArrayList);
         recyclerView.setAdapter(recyclerViewAdapter);
-        karttaViewModel.getRecordListObservable().observeForever( (recordList) -> {
+
+        karttaViewModel.getRecordListObservable().observe( getViewLifecycleOwner(), recordList -> {
             recordArrayList.clear();
             recordArrayList.addAll(recordList);
             recyclerViewAdapter.notifyDataSetChanged();
         });
+
         return view;
     }
 }
