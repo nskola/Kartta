@@ -110,7 +110,7 @@ public class KarttaFragment extends Fragment {
 
             googleMap.setOnMapClickListener((latLng) -> karttaViewModel.onMapClicked());
 
-            karttaViewModel.getViewState().observeForever((viewState) -> {
+            karttaViewModel.getViewStateObservable().observeForever((viewState) -> {
                 if (viewState == null)
                     return;
                 addMarkers(viewState);

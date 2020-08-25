@@ -3,7 +3,6 @@ package fi.neskola.kartta.ui.fragments;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,7 +45,7 @@ public class RecordListFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerViewAdapter = new RecordListRecyclerViewAdapter(view.getContext(), recordArrayList);
         recyclerView.setAdapter(recyclerViewAdapter);
-        karttaViewModel.getRecordList().observeForever( (recordList) -> {
+        karttaViewModel.getRecordListObservable().observeForever( (recordList) -> {
             recordArrayList.clear();
             recordArrayList.addAll(recordList);
             recyclerViewAdapter.notifyDataSetChanged();

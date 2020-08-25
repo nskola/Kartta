@@ -18,9 +18,9 @@ import fi.neskola.kartta.repository.KarttaRepository;
 @Singleton
 public class KarttaViewModel {
 
-    private MutableLiveData<ViewState> viewState = new MutableLiveData<>();
+    private MutableLiveData<ViewState> viewStateObservable = new MutableLiveData<>();
 
-    private MutableLiveData<List<IRecord>> recordList = new MutableLiveData<>();
+    private MutableLiveData<List<IRecord>> recordListObservable = new MutableLiveData<>();
 
     private final KarttaRepository karttaRepository;
 
@@ -36,69 +36,66 @@ public class KarttaViewModel {
     @Inject
     public KarttaViewModel(KarttaRepository karttaRepository) {
         this.karttaRepository = karttaRepository;
-        karttaRepository.getTargetLiveData().observeForever( targets -> {
+        karttaRepository.getTargetListObservable().observeForever(targets -> {
             ViewState newViewState;
-            if (viewState.getValue() == null)
+            if (viewStateObservable.getValue() == null)
                 newViewState = new ViewState();
             else
-                newViewState = copyViewStateFromOld(viewState.getValue());
+                newViewState = copyViewStateFromOld(viewStateObservable.getValue());
             newViewState.targetList.clear();
             newViewState.targetList.addAll(targets);
             List<IRecord> recordList = new ArrayList<>(targets);
-            this.recordList.setValue(recordList);
-            viewState.setValue(newViewState);
+            this.recordListObservable.setValue(recordList);
+            viewStateObservable.setValue(newViewState);
         });
 
     }
 
-    public MutableLiveData<ViewState> getViewState() {
-        return viewState;
+    public MutableLiveData<ViewState> getViewStateObservable() {
+        return viewStateObservable;
     }
 
-    public MutableLiveData<List<IRecord>> getRecordList() { return recordList; }
+    public MutableLiveData<List<IRecord>> getRecordListObservable() { return recordListObservable; }
 
     public void onAddTargetButtonClicked(LatLng latLng){
-        ViewState oldState = viewState.getValue();
+        ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         ViewState nameNewTargetState = copyViewStateFromOld(oldState);
         nameNewTargetState.stateName = ViewState.State.NEW_TARGET;
         nameNewTargetState.center = latLng;
-        viewState.setValue(nameNewTargetState);
+        viewStateObservable.setValue(nameNewTargetState);
     }
 
     public void onTargetSaveClicked(String targetName){
-        ViewState oldState = viewState.getValue();
+        ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         LatLng latLng = oldState.center;
         Target target = new Target(targetName);
         target.setPoint(new Point(latLng));
-        karttaRepository.insertTarget(target, newRecord -> {
-            ViewState viewTargetState = copyViewStateFromOld(oldState);
-            viewTargetState.stateName = ViewState.State.VIEW_TARGET;
-            viewTargetState.targetList.add(newRecord);
-            viewTargetState.focusedTarget = newRecord;
-            viewState.setValue(viewTargetState);
-            List<IRecord> recordList = new ArrayList<>();
-            if (this.recordList.getValue() != null)
-                recordList.addAll(this.recordList.getValue());
-            recordList.add(newRecord);
-            this.recordList.setValue(recordList);
-        });
+
+        //This will be only temporary target, until repository emits new record list for us
+        ViewState viewTargetState = copyViewStateFromOld(oldState);
+        viewTargetState.stateName = ViewState.State.VIEW_TARGET;
+        viewTargetState.targetList.add(target);
+        viewTargetState.focusedTarget = target;
+        viewStateObservable.setValue(viewTargetState);
+
+        karttaRepository.insertTarget(target);
     }
 
     public void onTargetSaveCancelClicked() {
-        ViewState oldState = viewState.getValue();
+        ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         ViewState viewState = copyViewStateFromOld(oldState);
         viewState.stateName = ViewState.State.VIEW_MAP;
-        this.viewState.setValue(viewState);
+        this.viewStateObservable.setValue(viewState);
     }
 
     public void onMarkerClicked(long recordId) {
-        ViewState oldState = viewState.getValue();
+        ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         for (Target target : oldState.targetList) {
@@ -106,20 +103,20 @@ public class KarttaViewModel {
                 ViewState viewTargetState = copyViewStateFromOld(oldState);
                 viewTargetState.stateName = ViewState.State.VIEW_TARGET;
                 viewTargetState.focusedTarget = target;
-                viewState.setValue(viewTargetState);
+                viewStateObservable.setValue(viewTargetState);
                 break;
             }
         }
     }
 
     public void onMapClicked(){
-        ViewState oldState = viewState.getValue();
+        ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         ViewState viewState = copyViewStateFromOld(oldState);
         viewState.stateName = ViewState.State.VIEW_MAP;
         viewState.center = null;
-        this.viewState.setValue(viewState);
+        this.viewStateObservable.setValue(viewState);
     }
 
     private static ViewState copyViewStateFromOld(ViewState oldViewState) {
@@ -130,7 +127,4 @@ public class KarttaViewModel {
         newViewState.focusedTarget = oldViewState.focusedTarget;
         return newViewState;
     }
-
-
-
 }

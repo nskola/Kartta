@@ -31,28 +31,27 @@ public class KarttaRepository {
 
     KarttaDatabase database;
 
-    MutableLiveData<List<Target>> targetLiveData = new MutableLiveData<>();
+    MutableLiveData<List<Target>> targetListObservable = new MutableLiveData<>();
 
-    public LiveData<List<Target>> getTargetLiveData() {
-        return targetLiveData;
+    public LiveData<List<Target>> getTargetListObservable() {
+        return targetListObservable;
     }
 
     @Inject
     public KarttaRepository(KarttaDatabase database) {
         this.database = database;
-        getTargets((targets -> targetLiveData.setValue(targets)));
+        getTargets((targets -> targetListObservable.setValue(targets)));
     }
 
-    public void insertTarget(Target target, Callback callback){
+    public void insertTarget(Target target){
         Executor.execute(() -> {
             long id = database.targetDao().insert(target);
             if (id > 0) {
                 target.setId(id);
                 Point point = target.getPoint();
                 point.setParent_id(id);
-                long pointId = database.pointDao().insert(point);
-                point.setId(pointId);
-                new Handler(Looper.getMainLooper()).post(() -> callback.result(target));
+                database.pointDao().insert(point);
+                getTargetsAndEmitResult();
             }
         });
     }
@@ -65,6 +64,10 @@ public class KarttaRepository {
             }
             new Handler(Looper.getMainLooper()).post(() -> callback.result(targets));
         });
+    }
+
+    private void getTargetsAndEmitResult(){
+        getTargets((targets -> targetListObservable.setValue(targets)));
     }
 
 }
