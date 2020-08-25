@@ -19,6 +19,6 @@ public interface TargetDao {
     void deleteAll();
 
     @Query("SELECT * from targets ORDER BY target_id ASC")
-    List<Target> getAllRecords();
+    List<Target> getAllTargets();
 
 }

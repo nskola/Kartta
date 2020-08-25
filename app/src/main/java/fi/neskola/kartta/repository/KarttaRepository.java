@@ -24,22 +24,28 @@ public class KarttaRepository {
         //TODO: void error()
     }
 
+    public interface ListCallback {
+        void result(List<Target> targets);
+        //TODO: void error()
+    }
+
     KarttaDatabase database;
 
-    MutableLiveData<List<Target>> targets = new MutableLiveData<>();
+    MutableLiveData<List<Target>> targetLiveData = new MutableLiveData<>();
+
+    public LiveData<List<Target>> getTargetLiveData() {
+        return targetLiveData;
+    }
 
     @Inject
     public KarttaRepository(KarttaDatabase database) {
         this.database = database;
-    }
-
-    LiveData<List<Target>> getTargets() {
-        return targets;
+        getTargets((targets -> targetLiveData.setValue(targets)));
     }
 
     public void insertTarget(Target target, Callback callback){
         Executor.execute(() -> {
-            long id = database.recordDao().insert(target);
+            long id = database.targetDao().insert(target);
             if (id > 0) {
                 target.setId(id);
                 Point point = target.getPoint();
@@ -48,6 +54,16 @@ public class KarttaRepository {
                 point.setId(pointId);
                 new Handler(Looper.getMainLooper()).post(() -> callback.result(target));
             }
+        });
+    }
+
+    private void getTargets(ListCallback callback){
+        Executor.execute(() -> {
+            List<Target> targets = database.targetDao().getAllTargets();
+            for (Target target : targets) {
+                target.setPoint(database.pointDao().getPointForTarget(target.getId()));
+            }
+            new Handler(Looper.getMainLooper()).post(() -> callback.result(targets));
         });
     }
 

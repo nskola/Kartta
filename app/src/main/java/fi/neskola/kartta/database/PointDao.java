@@ -20,6 +20,9 @@ public interface PointDao {
     void deleteAll();
 
     @Query("SELECT * from points WHERE parent_id = :parent_id")
-    List<Point> getPointsForRecord(long parent_id);
+    List<Point> getPointsForParent(long parent_id);
+
+    @Query("SELECT * from points WHERE parent_id = :target_id")
+    Point getPointForTarget(long target_id);
 
 }

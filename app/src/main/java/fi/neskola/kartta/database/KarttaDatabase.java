@@ -17,7 +17,7 @@ import fi.neskola.kartta.models.Target;
 public abstract class KarttaDatabase extends RoomDatabase {
 
     public abstract PointDao pointDao();
-    public abstract TargetDao recordDao();
+    public abstract TargetDao targetDao();
 
     public static KarttaDatabase buildDataBase(Context applicationContext) {
          return Room.databaseBuilder(applicationContext,

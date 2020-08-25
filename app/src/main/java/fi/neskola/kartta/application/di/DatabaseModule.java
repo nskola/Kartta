@@ -35,6 +35,6 @@ public class DatabaseModule {
     @Singleton
     @Provides
     TargetDao providesRecordDao(KarttaDatabase karttaDatabase) {
-        return karttaDatabase.recordDao();
+        return karttaDatabase.targetDao();
     }
 }

@@ -33,7 +33,17 @@ public class KarttaViewModel {
     @Inject
     public KarttaViewModel(KarttaRepository karttaRepository) {
         this.karttaRepository = karttaRepository;
-        viewState.setValue(new ViewState());
+        karttaRepository.getTargetLiveData().observeForever( targets -> {
+            ViewState newViewState;
+            if (viewState.getValue() == null)
+                newViewState = new ViewState();
+            else
+                newViewState = copyViewStateFromOld(viewState.getValue());
+            newViewState.targetList.clear();
+            newViewState.targetList.addAll(targets);
+            viewState.setValue(newViewState);
+        });
+
     }
 
     public MutableLiveData<ViewState> getViewState() {
