@@ -1,14 +1,9 @@
 package fi.neskola.kartta.viewmodels;
 
-import android.icu.text.AlphabeticIndex;
-
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
-
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,7 +11,6 @@ import javax.inject.Singleton;
 
 import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
-import fi.neskola.kartta.models.RecordType;
 import fi.neskola.kartta.models.Target;
 import fi.neskola.kartta.repository.KarttaRepository;
 

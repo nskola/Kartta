@@ -32,7 +32,7 @@ public class ViewState {
     public static ViewState makeInitialState(){
         ViewState state = new ViewState();
         state.stateName = ViewState.State.VIEW_MAP;
-        state.center = new LatLng(0,0);
+        state.center = new LatLng(40,50);
         state.targetList =  new ArrayList<>();
         state.focusedTarget = null;
         return state;
