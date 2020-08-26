@@ -88,7 +88,7 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
         };
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setMessage(String.format("Remove record (%s)?", record.getName()))
+        builder.setMessage(String.format("Remove %s?", record.getName()))
                 .setPositiveButton("Yes", dialogClickListener)
                 .setNegativeButton("No", dialogClickListener)
                 .show();

@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="54dp"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="?android:attr/selectableItemBackground"
     android:orientation="horizontal">
 
     <ImageView
