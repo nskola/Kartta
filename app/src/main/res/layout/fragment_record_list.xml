@@ -6,6 +6,15 @@
     android:layout_height="match_parent"
     tools:context=".ui.fragments.RecordListFragment">
 
+    <TextView
+        android:id="@+id/textView_noRecords"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="You have no records"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_main"
         android:layout_width="match_parent"

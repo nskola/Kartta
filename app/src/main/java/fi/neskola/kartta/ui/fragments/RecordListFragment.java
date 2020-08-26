@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -26,12 +27,15 @@ import fi.neskola.kartta.viewmodels.ViewEvent;
 
 public class RecordListFragment extends Fragment implements RecordListRecyclerViewAdapter.ViewHolderClickListener {
 
-    RecyclerView recyclerView;
-    RecordListRecyclerViewAdapter recyclerViewAdapter;
-    ArrayList<IRecord> recordArrayList = new ArrayList<>();
 
     @Inject
     RecordListViewModel viewModel;
+
+    private RecyclerView recyclerView;
+    private RecordListRecyclerViewAdapter recyclerViewAdapter;
+    private ArrayList<IRecord> recordArrayList = new ArrayList<>();
+
+    private TextView textView_noRecords;
 
     @Override
     public void onAttach(Context context) {
@@ -45,13 +49,19 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_record_list, container, false);
         recyclerView = view.findViewById(R.id.recycler_view_main);
+        textView_noRecords = view.findViewById(R.id.textView_noRecords);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         recyclerViewAdapter = new RecordListRecyclerViewAdapter(view.getContext(), recordArrayList, this);
         recyclerView.setAdapter(recyclerViewAdapter);
 
         viewModel.getRecordListObservable().observe( getViewLifecycleOwner(), recordList -> {
             recordArrayList.clear();
-            recordArrayList.addAll(recordList);
+            if (recordList == null || recordList.size() < 1) {
+                textView_noRecords.setVisibility(View.VISIBLE);
+            } else {
+                textView_noRecords.setVisibility(View.GONE);
+                recordArrayList.addAll(recordList);
+            }
             recyclerViewAdapter.notifyDataSetChanged();
         });
 
