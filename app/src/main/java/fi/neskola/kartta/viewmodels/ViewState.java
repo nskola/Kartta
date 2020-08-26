@@ -12,7 +12,8 @@ public class ViewState {
     public enum State {
         VIEW_MAP,
         NEW_TARGET,
-        VIEW_TARGET
+        VIEW_TARGET,
+        SHOW_USER_LOCATION
     }
 
     public State stateName;

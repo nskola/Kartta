@@ -50,6 +50,7 @@ import fi.neskola.kartta.viewmodels.ViewState;
 import static fi.neskola.kartta.services.LocationService.EXTRA_LATITUDE;
 import static fi.neskola.kartta.services.LocationService.EXTRA_LONGITUDE;
 import static fi.neskola.kartta.viewmodels.ViewState.State.NEW_TARGET;
+import static fi.neskola.kartta.viewmodels.ViewState.State.SHOW_USER_LOCATION;
 import static fi.neskola.kartta.viewmodels.ViewState.State.VIEW_MAP;
 import static fi.neskola.kartta.viewmodels.ViewState.State.VIEW_TARGET;
 
@@ -150,7 +151,7 @@ public class KarttaFragment extends Fragment {
                 return false;
             });
 
-            googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked());
+            googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked(latLng, false));
 
             //Start observing ViewSate from ViewModel
             viewModel.getViewStateObservable().observe(getViewLifecycleOwner(), viewState -> {
@@ -174,6 +175,11 @@ public class KarttaFragment extends Fragment {
                     showTargetInBottomSheet(viewState);
                     googleMap.animateCamera(CameraUpdateFactory.newLatLng(viewState.focusedTarget.getPoint().getLatLng()));
                     peekBottomSheet();
+                } else if (SHOW_USER_LOCATION == viewState.stateName) {
+                    closeBottomSheet();
+                    LatLng center = viewState.center;
+                    if (center != null)
+                        googleMap.animateCamera(CameraUpdateFactory.newLatLng(center));
                 }
             });
         }
@@ -201,7 +207,7 @@ public class KarttaFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.focus_to_user_location:
                 if (lastUserLocation != null)
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(lastUserLocation));
+                    viewModel.onFocusUserLocation(lastUserLocation);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

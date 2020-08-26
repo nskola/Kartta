@@ -1,5 +1,6 @@
 package fi.neskola.kartta.viewmodels;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -110,13 +111,18 @@ public class KarttaViewModel {
         }
     }
 
-    public void onMapClicked(){
+    public void onFocusUserLocation(LatLng latLng) {
+        onMapClicked(latLng, true);
+    }
+
+    public void onMapClicked(@Nullable LatLng latLng, boolean isUserLocation){
         ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
         ViewState viewState = copyViewStateFromOld(oldState);
-        viewState.stateName = ViewState.State.VIEW_MAP;
-        viewState.center = null;
+        viewState.stateName = isUserLocation ? ViewState.State.SHOW_USER_LOCATION : ViewState.State.VIEW_MAP;
+        viewState.focusedTarget = null;
+        viewState.center = latLng;
         this.viewStateObservable.setValue(viewState);
     }
 
