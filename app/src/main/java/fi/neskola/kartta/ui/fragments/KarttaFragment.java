@@ -68,7 +68,6 @@ public class KarttaFragment extends Fragment {
     Button bottomSheetSaveButton;
     Button bottomSheetCancelButton;
     ExtendedFloatingActionButton markPointButton;
-    ExtendedFloatingActionButton drawRouteButton;
     FloatingActionButton mainFAB;
 
     private boolean isFABOpen = false;
@@ -107,11 +106,9 @@ public class KarttaFragment extends Fragment {
         bottomSheetTextViewLongitude = view.findViewById(R.id.longitude_value);
         mainFAB =  view.findViewById(R.id.fab);
         markPointButton = view.findViewById(R.id.sub_fab1);
-        drawRouteButton =  view.findViewById(R.id.sub_fab2);
 
         //Start shrinked
         markPointButton.setExtended(false);
-        drawRouteButton.setExtended(false);
 
         mainFAB.setOnClickListener( (v) -> {
             if (!isFABOpen) {
@@ -260,29 +257,23 @@ public class KarttaFragment extends Fragment {
     public void hideFABs(){
         mainFAB.setVisibility(View.GONE);
         markPointButton.setVisibility(View.GONE);
-        drawRouteButton.setVisibility(View.GONE);
     }
 
     public void showFABs(){
         mainFAB.setVisibility(View.VISIBLE);
         markPointButton.setVisibility(View.VISIBLE);
-        drawRouteButton.setVisibility(View.VISIBLE);
     }
 
     private void showFABMenu(){
         isFABOpen=true;
         markPointButton.extend();
-        drawRouteButton.extend();
         markPointButton.animate().translationY(-getResources().getDimension(R.dimen.standard_55));
-        drawRouteButton.animate().translationY(-getResources().getDimension(R.dimen.standard_105));
     }
 
     private void closeFABMenu(){
         isFABOpen=false;
-        drawRouteButton.shrink();
         markPointButton.shrink();
         markPointButton.animate().translationY(0);
-        drawRouteButton.animate().translationY(0);
     }
 
     private void closeBottomSheet(){
