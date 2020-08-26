@@ -75,7 +75,6 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
     private void createRemoveDialog(IRecord record) {
         if (getContext() == null)
             return;
-
         DialogInterface.OnClickListener dialogClickListener = (dialog, which) -> {
             switch (which){
                 case DialogInterface.BUTTON_POSITIVE:
@@ -86,7 +85,6 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
                     break;
             }
         };
-
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage(String.format("Remove %s?", record.getName()))
                 .setPositiveButton("Yes", dialogClickListener)

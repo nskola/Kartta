@@ -152,6 +152,7 @@ public class KarttaFragment extends Fragment {
 
             googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked());
 
+            //Start observing ViewSate from ViewModel
             viewModel.getViewStateObservable().observe(getViewLifecycleOwner(), viewState -> {
                 if (viewState == null)
                     return;
@@ -163,33 +164,20 @@ public class KarttaFragment extends Fragment {
                     if (center != null)
                         googleMap.moveCamera(CameraUpdateFactory.newLatLng(center));
                 } else if (NEW_TARGET == viewState.stateName) {
-                    bottomSheetEditTextName.getText().clear();
-                    bottomSheetEditTextName.setInputType(InputType.TYPE_CLASS_TEXT);
-                    bottomSheetEditTextName.requestFocus();
-                    bottomSheetTextViewLatitude.setText(String.valueOf(viewState.center.latitude));
-                    bottomSheetTextViewLongitude.setText(String.valueOf(viewState.center.longitude));
+                    showNewTargetBottomSheet(viewState);
                     MarkerOptions options = new MarkerOptions()
                             .position(viewState.center);
                     googleMap.addMarker(options);
-                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
                     backgroundDimmer.setVisibility(View.VISIBLE);
                     hideFABs();
                 } else if (VIEW_TARGET == viewState.stateName) {
-                    Target target = viewState.focusedTarget;
-                    bottomSheetEditTextName.clearFocus();
-                    bottomSheetEditTextName.setInputType(InputType.TYPE_NULL);
-                    bottomSheetEditTextName.getText().clear();
-                    bottomSheetTextViewLatitude.setText(String.valueOf(target.getPoint().getLatitude()));
-                    bottomSheetTextViewLongitude.setText(String.valueOf(target.getPoint().getLongitude()));
-                    bottomSheetEditTextName.getText().append(viewState.focusedTarget.getName());
+                    showTargetInBottomSheet(viewState);
                     googleMap.animateCamera(CameraUpdateFactory.newLatLng(viewState.focusedTarget.getPoint().getLatLng()));
                     peekBottomSheet();
                 }
             });
         }
     };
-
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -290,6 +278,25 @@ public class KarttaFragment extends Fragment {
         showFABs();
     }
 
+    private void showNewTargetBottomSheet(ViewState viewState) {
+        bottomSheetEditTextName.getText().clear();
+        bottomSheetEditTextName.setInputType(InputType.TYPE_CLASS_TEXT);
+        bottomSheetEditTextName.requestFocus();
+        bottomSheetTextViewLatitude.setText(String.valueOf(viewState.center.latitude));
+        bottomSheetTextViewLongitude.setText(String.valueOf(viewState.center.longitude));
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+    private void showTargetInBottomSheet(ViewState viewState) {
+        Target target = viewState.focusedTarget;
+        bottomSheetEditTextName.clearFocus();
+        bottomSheetEditTextName.setInputType(InputType.TYPE_NULL);
+        bottomSheetEditTextName.getText().clear();
+        bottomSheetTextViewLatitude.setText(String.valueOf(target.getPoint().getLatitude()));
+        bottomSheetTextViewLongitude.setText(String.valueOf(target.getPoint().getLongitude()));
+        bottomSheetEditTextName.getText().append(viewState.focusedTarget.getName());
+    }
+
     private void addMarkers(ViewState state) {
         googleMap.clear();
         for (Target target : state.targetList) {
@@ -329,5 +336,4 @@ public class KarttaFragment extends Fragment {
             }
         };
     }
-
 }
