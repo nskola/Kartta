@@ -5,7 +5,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import fi.neskola.kartta.models.Target;
+import fi.neskola.kartta.models.IRecord;
 
 public class ViewState {
 
@@ -18,15 +18,15 @@ public class ViewState {
 
     public State stateName;
     public LatLng center;
-    public List<Target> targetList = new ArrayList<>();
-    public Target focusedTarget;
+    public List<IRecord> recordList = new ArrayList<>();
+    public IRecord focusedRecord;
 
     public static ViewState copyViewStateFromOld(ViewState oldViewState) {
         ViewState newViewState = new ViewState();
         newViewState.center = oldViewState.center;
         newViewState.stateName = oldViewState.stateName;
-        newViewState.targetList.addAll(oldViewState.targetList);
-        newViewState.focusedTarget = oldViewState.focusedTarget;
+        newViewState.recordList.addAll(oldViewState.recordList);
+        newViewState.focusedRecord = oldViewState.focusedRecord;
         return newViewState;
     }
 
@@ -34,8 +34,8 @@ public class ViewState {
         ViewState state = new ViewState();
         state.stateName = ViewState.State.VIEW_MAP;
         state.center = new LatLng(40,50);
-        state.targetList =  new ArrayList<>();
-        state.focusedTarget = null;
+        state.recordList =  new ArrayList<>();
+        state.focusedRecord = null;
         return state;
     }
 

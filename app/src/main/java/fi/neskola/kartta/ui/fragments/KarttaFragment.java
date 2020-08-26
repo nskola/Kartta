@@ -43,7 +43,9 @@ import javax.inject.Inject;
 
 import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
+import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
+import fi.neskola.kartta.models.RecordType;
 import fi.neskola.kartta.models.Target;
 import fi.neskola.kartta.viewmodels.KarttaViewModel;
 import fi.neskola.kartta.viewmodels.ViewState;
@@ -175,7 +177,7 @@ public class KarttaFragment extends Fragment {
                     hideFABs();
                 } else if (VIEW_TARGET == viewState.stateName) {
                     showTargetInBottomSheet(viewState);
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(viewState.focusedTarget.getPoint().getLatLng()));
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLng(viewState.focusedRecord.getPoints().get(0).getLatLng()));
                     peekBottomSheet();
                 } else if (SHOW_USER_LOCATION == viewState.stateName) {
                     closeBottomSheet();
@@ -282,25 +284,26 @@ public class KarttaFragment extends Fragment {
     }
 
     private void showTargetInBottomSheet(ViewState viewState) {
-        Target target = viewState.focusedTarget;
         bottomSheetEditTextName.clearFocus();
         bottomSheetEditTextName.setInputType(InputType.TYPE_NULL);
         bottomSheetEditTextName.getText().clear();
-        bottomSheetTextViewLatitude.setText(String.valueOf(target.getPoint().getLatitude()));
-        bottomSheetTextViewLongitude.setText(String.valueOf(target.getPoint().getLongitude()));
-        bottomSheetEditTextName.getText().append(viewState.focusedTarget.getName());
+        bottomSheetTextViewLatitude.setText(String.valueOf(viewState.focusedRecord.getPoints().get(0).getLatitude()));
+        bottomSheetTextViewLongitude.setText(String.valueOf(viewState.focusedRecord.getPoints().get(0).getLongitude()));
+        bottomSheetEditTextName.getText().append(viewState.focusedRecord.getName());
     }
 
     private void addMarkers(ViewState state) {
         googleMap.clear();
-        for (Target target : state.targetList) {
-            MarkerOptions markerOptions = new MarkerOptions().title(target.getName());
-            Point point = target.getPoint();
-            markerOptions.position(point.getLatLng());
-            Marker marker = googleMap.addMarker(markerOptions);
-            marker.setTag(target.getId());
-            if (state.stateName == VIEW_TARGET && state.focusedTarget.equals(target)) {
-                marker.showInfoWindow();
+        for (IRecord record : state.recordList) {
+            if (record.getType() == RecordType.TARGET) {
+                MarkerOptions markerOptions = new MarkerOptions().title(record.getName());
+                Point point = record.getPoints().get(0);
+                markerOptions.position(point.getLatLng());
+                Marker marker = googleMap.addMarker(markerOptions);
+                marker.setTag(record.getId());
+                if (state.stateName == VIEW_TARGET && state.focusedRecord.equals(record)) {
+                    marker.showInfoWindow();
+                }
             }
         }
     }

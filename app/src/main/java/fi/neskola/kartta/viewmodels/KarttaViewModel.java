@@ -31,22 +31,19 @@ public class KarttaViewModel {
                 newViewState = ViewState.makeInitialState();
             else
                 newViewState = copyViewStateFromOld(viewStateObservable.getValue());
-            newViewState.targetList.clear();
+            newViewState.recordList.clear();
 
             boolean currentRecordExists = false;
 
             for (IRecord record : records) {
-                if (newViewState.focusedTarget != null && record.getId() == newViewState.focusedTarget.getId())
+                newViewState.recordList.add((Target) record);
+                if (newViewState.focusedRecord != null && record.getId() == newViewState.focusedRecord.getId())
                     currentRecordExists = true;
-
-                if (record instanceof Target) {
-                    newViewState.targetList.add((Target) record);
-                }
             }
 
             //If currently focused record was removed, fallback to VIEW_MAP state
             if (!currentRecordExists && newViewState.stateName == ViewState.State.VIEW_TARGET) {
-                newViewState.focusedTarget = null;
+                newViewState.focusedRecord = null;
                 newViewState.stateName = ViewState.State.VIEW_MAP;
             }
 
@@ -80,8 +77,8 @@ public class KarttaViewModel {
         //This will be only temporary target, until repository emits new record list for us
         ViewState viewTargetState = copyViewStateFromOld(oldState);
         viewTargetState.stateName = ViewState.State.VIEW_TARGET;
-        viewTargetState.targetList.add(target);
-        viewTargetState.focusedTarget = target;
+        viewTargetState.recordList.add(target);
+        viewTargetState.focusedRecord = target;
         viewStateObservable.setValue(viewTargetState);
 
         karttaRepository.insertTarget(target);
@@ -100,11 +97,11 @@ public class KarttaViewModel {
         ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
-        for (Target target : oldState.targetList) {
-            if (target.getId() == recordId) {
+        for (IRecord record : oldState.recordList) {
+            if (record.getId() == recordId) {
                 ViewState viewTargetState = copyViewStateFromOld(oldState);
                 viewTargetState.stateName = ViewState.State.VIEW_TARGET;
-                viewTargetState.focusedTarget = target;
+                viewTargetState.focusedRecord = record;
                 viewStateObservable.setValue(viewTargetState);
                 break;
             }
@@ -125,7 +122,7 @@ public class KarttaViewModel {
             throw new IllegalStateException("Old state was null");
         ViewState viewState = copyViewStateFromOld(oldState);
         viewState.stateName = isUserLocation ? ViewState.State.SHOW_USER_LOCATION : ViewState.State.VIEW_MAP;
-        viewState.focusedTarget = null;
+        viewState.focusedRecord = null;
         viewState.center = latLng;
         this.viewStateObservable.setValue(viewState);
     }
