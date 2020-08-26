@@ -1,23 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="54dp"
+    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal">
 
     <ImageView
         android:id="@+id/imgView_icon"
-        android:layout_width="25dp"
-        android:layout_height="25dp"
-        android:layout_margin="8dp"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginLeft="6dp"
+        android:layout_marginStart="6dp"
         android:src="@drawable/ic_location_24" />
 
-    <TextView
-        android:id="@+id/txtView_title"
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:text="itemi"/>
+        android:layout_height="match_parent"
+        android:layout_marginLeft="12dp"
+        android:layout_marginStart="12dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/txtView_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            tools:text="item"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"/>
+
+        <TextView
+            android:id="@+id/txtView_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="type"
+            android:textSize="12sp"/>
+
+    </LinearLayout>
 
 </LinearLayout>

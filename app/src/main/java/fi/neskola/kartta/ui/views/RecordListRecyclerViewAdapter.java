@@ -38,6 +38,14 @@ public class RecordListRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         IRecord record = records.get(position);
         RecyclerViewViewHolder viewHolder= (RecyclerViewViewHolder) holder;
         viewHolder.txtView_title.setText(record.getName());
+        switch (record.getType()) {
+            case TARGET:
+                viewHolder.txtView_type.setText("Target");
+            case ROUTE:
+            case AREA:
+                break;
+        }
+
     }
 
     @Override
@@ -48,9 +56,11 @@ public class RecordListRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
     static class RecyclerViewViewHolder extends RecyclerView.ViewHolder {
         ImageView imgView_icon;
         TextView txtView_title;
+        TextView txtView_type;
 
         public RecyclerViewViewHolder(@NonNull View itemView) {
             super(itemView);
+            txtView_type = itemView.findViewById(R.id.txtView_type);
             imgView_icon = itemView.findViewById(R.id.imgView_icon);
             txtView_title = itemView.findViewById(R.id.txtView_title);
         }
