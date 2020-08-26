@@ -14,9 +14,9 @@ import fi.neskola.kartta.repository.KarttaRepository;
 @Singleton
 public class RecordListViewModel {
 
-    KarttaRepository karttaRepository;
+    private KarttaRepository karttaRepository;
 
-    MutableLiveData<EventWrapper<ViewEvent>> viewEventObservable = new MutableLiveData<>();
+    private MutableLiveData<EventWrapper<ViewEvent>> viewEventObservable = new MutableLiveData<>();
 
     @Inject
     public RecordListViewModel(KarttaRepository karttaRepository) {
