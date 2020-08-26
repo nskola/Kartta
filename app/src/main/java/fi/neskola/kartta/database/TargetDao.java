@@ -21,4 +21,7 @@ public interface TargetDao {
     @Query("SELECT * from targets ORDER BY target_id ASC")
     List<Target> getAllTargets();
 
+    @Query("DELETE FROM targets WHERE target_id = :id")
+    void delete(long id);
+
 }

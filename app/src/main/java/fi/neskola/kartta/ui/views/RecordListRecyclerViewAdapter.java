@@ -1,6 +1,5 @@
 package fi.neskola.kartta.ui.views;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,12 +17,18 @@ import fi.neskola.kartta.models.IRecord;
 
 public class RecordListRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    public interface ViewHolderClickListener{
+         void onListItemClicked(IRecord record);
+    }
+
     Context context;
     ArrayList<IRecord> records;
+    ViewHolderClickListener viewHolderClickListener;
 
-    public RecordListRecyclerViewAdapter(Context context, ArrayList<IRecord> userArrayList) {
+    public RecordListRecyclerViewAdapter(Context context, ArrayList<IRecord> userArrayList, ViewHolderClickListener viewHolderClickListener) {
         this.context = context;
         this.records = userArrayList;
+        this.viewHolderClickListener = viewHolderClickListener;
     }
 
     @NonNull
@@ -38,6 +43,7 @@ public class RecordListRecyclerViewAdapter extends RecyclerView.Adapter<Recycler
         IRecord record = records.get(position);
         RecyclerViewViewHolder viewHolder= (RecyclerViewViewHolder) holder;
         viewHolder.txtView_title.setText(record.getName());
+        viewHolder.itemView.setOnClickListener((view) -> viewHolderClickListener.onListItemClicked(record));
         switch (record.getType()) {
             case TARGET:
                 viewHolder.txtView_type.setText("Target");

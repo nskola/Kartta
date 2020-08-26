@@ -53,6 +53,21 @@ public class KarttaRepository {
         });
     }
 
+    public void removeRecord(IRecord record) {
+        switch (record.getType()) {
+            case TARGET:
+                Executor.execute(() -> {
+                    database.targetDao().delete(record.getId());
+                    getRecordsAndEmitResult();
+                });
+                break;
+            case AREA:
+            case ROUTE:
+                break;
+        }
+
+    }
+
     private void getRecords(ListCallback callback){
         Executor.execute(() -> {
             List<IRecord> records = new ArrayList<>();
@@ -67,6 +82,9 @@ public class KarttaRepository {
         });
     }
 
+    /**
+     * gets all records from db and emits them forward, so all observers get the latest data
+     */
     private void getRecordsAndEmitResult(){
         getRecords((targets -> recordListObservable.setValue(targets)));
     }

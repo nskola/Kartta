@@ -56,7 +56,7 @@ import static fi.neskola.kartta.viewmodels.ViewState.State.VIEW_TARGET;
 public class KarttaFragment extends Fragment {
 
     @Inject
-    KarttaViewModel karttaViewModel;
+    KarttaViewModel viewModel;
 
     GoogleMap googleMap;
 
@@ -119,15 +119,15 @@ public class KarttaFragment extends Fragment {
         });
 
         markPointButton.setOnClickListener((v) ->  {
-            karttaViewModel.onAddTargetButtonClicked(getCameraPosition());
+            viewModel.onAddTargetButtonClicked(getCameraPosition());
         });
 
         bottomSheetSaveButton.setOnClickListener( (v) -> {
-            karttaViewModel.onTargetSaveClicked(bottomSheetEditTextName.getText().toString());
+            viewModel.onTargetSaveClicked(bottomSheetEditTextName.getText().toString());
         });
 
         bottomSheetCancelButton.setOnClickListener( (v) -> {
-            karttaViewModel.onTargetSaveCancelClicked();
+            viewModel.onTargetSaveCancelClicked();
 
         });
 
@@ -146,13 +146,13 @@ public class KarttaFragment extends Fragment {
 
             googleMap.setOnMarkerClickListener((marker) -> {
                 long id = (long) marker.getTag();
-                karttaViewModel.onMarkerClicked(id);
+                viewModel.onMarkerClicked(id);
                 return false;
             });
 
-            googleMap.setOnMapClickListener((latLng) -> karttaViewModel.onMapClicked());
+            googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked());
 
-            karttaViewModel.getViewStateObservable().observe(getViewLifecycleOwner(), viewState -> {
+            viewModel.getViewStateObservable().observe(getViewLifecycleOwner(), viewState -> {
                 if (viewState == null)
                     return;
                 addMarkers(viewState);
@@ -233,7 +233,7 @@ public class KarttaFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        karttaViewModel.onMapPaused(getCameraPosition());
+        viewModel.onMapPaused(getCameraPosition());
         if (broadcastReceiver != null)
             LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
     }
