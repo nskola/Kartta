@@ -46,10 +46,6 @@ public class KarttaViewModel {
         return viewStateObservable;
     }
 
-    public LiveData<List<IRecord>> getRecordListObservable() {
-        return karttaRepository.getRecordListObservable();
-    }
-
     public void onAddTargetButtonClicked(LatLng latLng){
         ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)

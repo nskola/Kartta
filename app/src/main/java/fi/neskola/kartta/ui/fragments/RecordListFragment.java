@@ -19,7 +19,7 @@ import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.ui.views.RecordListRecyclerViewAdapter;
-import fi.neskola.kartta.viewmodels.KarttaViewModel;
+import fi.neskola.kartta.viewmodels.RecordListViewModel;
 
 public class RecordListFragment extends Fragment {
 
@@ -28,7 +28,7 @@ public class RecordListFragment extends Fragment {
     ArrayList<IRecord> recordArrayList = new ArrayList<>();
 
     @Inject
-    KarttaViewModel karttaViewModel;
+    RecordListViewModel recordListViewModel;
 
     @Override
     public void onAttach(Context context) {
@@ -46,7 +46,7 @@ public class RecordListFragment extends Fragment {
         recyclerViewAdapter = new RecordListRecyclerViewAdapter(view.getContext(), recordArrayList);
         recyclerView.setAdapter(recyclerViewAdapter);
 
-        karttaViewModel.getRecordListObservable().observe( getViewLifecycleOwner(), recordList -> {
+        recordListViewModel.getRecordListObservable().observe( getViewLifecycleOwner(), recordList -> {
             recordArrayList.clear();
             recordArrayList.addAll(recordList);
             recyclerViewAdapter.notifyDataSetChanged();
