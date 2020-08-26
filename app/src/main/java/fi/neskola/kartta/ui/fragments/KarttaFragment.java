@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -59,22 +60,22 @@ public class KarttaFragment extends Fragment {
     @Inject
     KarttaViewModel viewModel;
 
-    GoogleMap googleMap;
+    private GoogleMap googleMap;
 
-    BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
-    ConstraintLayout bottomSheet;
-    View backgroundDimmer;
-    EditText bottomSheetEditTextName;
-    TextView bottomSheetTextViewLatitude, bottomSheetTextViewLongitude;
-    Button bottomSheetSaveButton;
-    Button bottomSheetCancelButton;
-    ExtendedFloatingActionButton markPointButton;
-    FloatingActionButton mainFAB;
+    private BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
+    private ConstraintLayout bottomSheet;
+    private View backgroundDimmer;
+    private EditText bottomSheetEditTextName;
+    private TextView bottomSheetTextViewLatitude, bottomSheetTextViewLongitude;
+    private Button bottomSheetSaveButton;
+    private Button bottomSheetCancelButton;
+    private ExtendedFloatingActionButton markPointButton;
+    private FloatingActionButton mainFAB;
 
     private boolean isFABOpen = false;
     private LatLng lastUserLocation;
 
-    BroadcastReceiver broadcastReceiver;
+    private BroadcastReceiver broadcastReceiver;
 
     final static int REQUEST_FINE_LOCATION = 555;
 
@@ -140,6 +141,7 @@ public class KarttaFragment extends Fragment {
         @Override
         public void onMapReady(GoogleMap googleMap) {
             KarttaFragment.this.googleMap = googleMap;
+            googleMap.getUiSettings().setMapToolbarEnabled(false);
             googleMap.getUiSettings().setMyLocationButtonEnabled(false);
             if(checkLocationPermissions()) {
                 googleMap.setMyLocationEnabled(true);
@@ -151,7 +153,7 @@ public class KarttaFragment extends Fragment {
                 return false;
             });
 
-            googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked(latLng, false));
+            googleMap.setOnMapClickListener((latLng) -> viewModel.onMapClicked());
 
             //Start observing ViewSate from ViewModel
             viewModel.getViewStateObservable().observe(getViewLifecycleOwner(), viewState -> {
@@ -208,6 +210,8 @@ public class KarttaFragment extends Fragment {
             case R.id.focus_to_user_location:
                 if (lastUserLocation != null)
                     viewModel.onFocusUserLocation(lastUserLocation);
+                else
+                    Toast.makeText(getContext(),"Location not available", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -230,22 +234,6 @@ public class KarttaFragment extends Fragment {
         viewModel.onMapPaused(getCameraPosition());
         if (broadcastReceiver != null)
             LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(broadcastReceiver);
-    }
-
-    private boolean checkLocationPermissions() {
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        } else {
-            requestLocationPermission();
-            return false;
-        }
-    }
-
-    private void requestLocationPermission() {
-        ActivityCompat.requestPermissions( getActivity(),
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                REQUEST_FINE_LOCATION);
     }
 
     public void hideFABs(){
@@ -322,6 +310,22 @@ public class KarttaFragment extends Fragment {
             return null;
         CameraPosition mUpCameraPosition = googleMap.getCameraPosition();
         return new LatLng(mUpCameraPosition.target.latitude, mUpCameraPosition.target.longitude);
+    }
+
+    private boolean checkLocationPermissions() {
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        } else {
+            requestLocationPermission();
+            return false;
+        }
+    }
+
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions( getActivity(),
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                REQUEST_FINE_LOCATION);
     }
 
     private BroadcastReceiver getBroadcastReceiver(){

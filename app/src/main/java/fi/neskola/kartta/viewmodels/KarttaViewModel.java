@@ -112,10 +112,14 @@ public class KarttaViewModel {
     }
 
     public void onFocusUserLocation(LatLng latLng) {
-        onMapClicked(latLng, true);
+        onViewMap(latLng, true);
     }
 
-    public void onMapClicked(@Nullable LatLng latLng, boolean isUserLocation){
+    public void onMapClicked() {
+        onViewMap(null, false);
+    }
+
+    private void onViewMap(@Nullable LatLng latLng, boolean isUserLocation){
         ViewState oldState = viewStateObservable.getValue();
         if (oldState == null)
             throw new IllegalStateException("Old state was null");
