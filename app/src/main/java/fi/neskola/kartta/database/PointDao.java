@@ -11,8 +11,7 @@ import fi.neskola.kartta.models.Point;
 
 @Dao
 public interface PointDao {
-    // allowing the insert of the same word multiple times by passing a
-    // conflict resolution strategy
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     long insert(Point point);
 

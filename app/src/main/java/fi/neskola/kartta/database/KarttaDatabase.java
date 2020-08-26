@@ -32,6 +32,7 @@ public abstract class KarttaDatabase extends RoomDatabase {
         @Override
         public void onOpen(@NonNull SupportSQLiteDatabase db) {
             if (BuildConfig.DEBUG) {
+                //Causes db warnings, but makes reading database easier
                 db.disableWriteAheadLogging();
             }
             super.onOpen(db);

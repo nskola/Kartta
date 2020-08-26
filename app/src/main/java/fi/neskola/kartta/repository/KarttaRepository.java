@@ -23,7 +23,6 @@ public class KarttaRepository {
 
     public interface ListCallback {
         void result(List<IRecord> records);
-        //TODO: void error()
     }
 
     KarttaDatabase database;
