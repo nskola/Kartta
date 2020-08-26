@@ -31,7 +31,7 @@ public class KarttaViewModel {
             else
                 newViewState = copyViewStateFromOld(viewStateObservable.getValue());
             newViewState.targetList.clear();
-             
+
             boolean currentRecordExists = false;
 
             for (IRecord record : records) {
