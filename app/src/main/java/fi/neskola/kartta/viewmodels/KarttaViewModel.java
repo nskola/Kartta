@@ -1,10 +1,8 @@
 package fi.neskola.kartta.viewmodels;
 
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import com.google.android.gms.maps.model.LatLng;
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,10 +31,24 @@ public class KarttaViewModel {
             else
                 newViewState = copyViewStateFromOld(viewStateObservable.getValue());
             newViewState.targetList.clear();
+             
+            boolean currentRecordExists = false;
+
             for (IRecord record : records) {
-                if (record instanceof Target)
+                if (newViewState.focusedTarget != null && record.getId() == newViewState.focusedTarget.getId())
+                    currentRecordExists = true;
+
+                if (record instanceof Target) {
                     newViewState.targetList.add((Target) record);
+                }
             }
+
+            //If currently focused record was removed, fallback to VIEW_MAP state
+            if (!currentRecordExists && newViewState.stateName == ViewState.State.VIEW_TARGET) {
+                newViewState.focusedTarget = null;
+                newViewState.stateName = ViewState.State.VIEW_MAP;
+            }
+
             viewStateObservable.setValue(newViewState);
         });
 
