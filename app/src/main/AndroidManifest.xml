@@ -24,11 +24,10 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="API_KEY_PLACEHOLDER" />
 
         <activity
             android:name=".ui.activities.MapsActivity"
-            android:label="@string/title_activity_maps"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
