@@ -54,7 +54,7 @@
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/sub_fab1"
-        android:text="Add point"
+        android:text="Add target"
         app:icon="@android:drawable/ic_dialog_map"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
