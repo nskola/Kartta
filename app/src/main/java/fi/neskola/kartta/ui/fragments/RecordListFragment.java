@@ -22,14 +22,13 @@ import javax.inject.Inject;
 import fi.neskola.kartta.R;
 import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.models.IRecord;
+import fi.neskola.kartta.ui.activities.MapsActivity;
 import fi.neskola.kartta.ui.views.RecordListRecyclerViewAdapter;
 import fi.neskola.kartta.viewmodels.RecordListViewModel;
 import fi.neskola.kartta.viewmodels.ViewEvent;
 
 public class RecordListFragment extends Fragment implements RecordListRecyclerViewAdapter.ViewHolderClickListener {
 
-
-    //@Inject
     RecordListViewModel viewModel;
 
     private RecyclerView recyclerView;
@@ -40,9 +39,7 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
 
     @Override
     public void onAttach(Context context) {
-        //Dagger inject
-        //((KarttaApplication) context.getApplicationContext()).getComponent().inject(this);
-        viewModel = new ViewModelProvider(requireActivity()).get(RecordListViewModel.class);
+        viewModel = ((MapsActivity) context).viewModelProvider.get(RecordListViewModel.class);
         super.onAttach(context);
     }
 

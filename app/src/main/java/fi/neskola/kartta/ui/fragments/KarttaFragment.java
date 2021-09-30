@@ -47,7 +47,9 @@ import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.models.Point;
 import fi.neskola.kartta.models.RecordType;
 import fi.neskola.kartta.models.Target;
+import fi.neskola.kartta.ui.activities.MapsActivity;
 import fi.neskola.kartta.viewmodels.KarttaViewModel;
+import fi.neskola.kartta.viewmodels.RecordListViewModel;
 import fi.neskola.kartta.viewmodels.ViewState;
 
 import static fi.neskola.kartta.services.LocationService.EXTRA_LATITUDE;
@@ -58,8 +60,6 @@ import static fi.neskola.kartta.viewmodels.ViewState.State.VIEW_MAP;
 import static fi.neskola.kartta.viewmodels.ViewState.State.VIEW_TARGET;
 
 public class KarttaFragment extends Fragment {
-
-    @Inject
     KarttaViewModel viewModel;
 
     private GoogleMap googleMap;
@@ -83,8 +83,7 @@ public class KarttaFragment extends Fragment {
 
     @Override
     public void onAttach(Context context) {
-        //Dagger inject
-        ((KarttaApplication) context.getApplicationContext()).getComponent().inject(this);
+        viewModel = ((MapsActivity) context).viewModelProvider.get(KarttaViewModel.class);
         super.onAttach(context);
     }
 

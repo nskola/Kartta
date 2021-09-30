@@ -26,14 +26,10 @@ import fi.neskola.kartta.viewmodels.ViewModelProviderFactory;
 
 public class MapsActivity extends AppCompatActivity{
 
-    @Inject
-    public KarttaRepository karttaRepository;
-
-    KarttaViewModel karttaViewModel;
-    RecordListViewModel recordListViewModel;
+    public ViewModelProvider viewModelProvider;
 
     @Inject
-    public ViewModelProviderFactory providerFactory;
+    ViewModelProviderFactory providerFactory;
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -56,10 +52,8 @@ public class MapsActivity extends AppCompatActivity{
         NavController navController = Navigation.findNavController(this, R.id.fragment_container);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
-
-        ViewModelProvider viewModelProvider = new ViewModelProvider(this, providerFactory);
-        recordListViewModel = viewModelProvider.get(RecordListViewModel.class);
-        karttaViewModel = viewModelProvider.get(KarttaViewModel.class);
+        
+        viewModelProvider = new ViewModelProvider(this, providerFactory);
 
     }
 
