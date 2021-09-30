@@ -1,7 +1,9 @@
 package fi.neskola.kartta.viewmodels;
 
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
@@ -12,7 +14,7 @@ import fi.neskola.kartta.models.IRecord;
 import fi.neskola.kartta.repository.KarttaRepository;
 
 @Singleton
-public class RecordListViewModel {
+public class RecordListViewModel extends ViewModel {
 
     private KarttaRepository karttaRepository;
 

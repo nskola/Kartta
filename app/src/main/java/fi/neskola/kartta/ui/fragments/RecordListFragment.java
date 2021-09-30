@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +29,7 @@ import fi.neskola.kartta.viewmodels.ViewEvent;
 public class RecordListFragment extends Fragment implements RecordListRecyclerViewAdapter.ViewHolderClickListener {
 
 
-    @Inject
+    //@Inject
     RecordListViewModel viewModel;
 
     private RecyclerView recyclerView;
@@ -40,7 +41,8 @@ public class RecordListFragment extends Fragment implements RecordListRecyclerVi
     @Override
     public void onAttach(Context context) {
         //Dagger inject
-        ((KarttaApplication) context.getApplicationContext()).getComponent().inject(this);
+        //((KarttaApplication) context.getApplicationContext()).getComponent().inject(this);
+        viewModel = new ViewModelProvider(requireActivity()).get(RecordListViewModel.class);
         super.onAttach(context);
     }
 

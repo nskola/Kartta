@@ -3,6 +3,7 @@ package fi.neskola.kartta.ui.activities;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -20,6 +21,8 @@ import fi.neskola.kartta.application.KarttaApplication;
 import fi.neskola.kartta.repository.KarttaRepository;
 import fi.neskola.kartta.services.LocationService;
 import fi.neskola.kartta.viewmodels.KarttaViewModel;
+import fi.neskola.kartta.viewmodels.RecordListViewModel;
+import fi.neskola.kartta.viewmodels.ViewModelProviderFactory;
 
 public class MapsActivity extends AppCompatActivity{
 
@@ -28,6 +31,11 @@ public class MapsActivity extends AppCompatActivity{
 
     @Inject
     KarttaViewModel karttaViewModel;
+
+    RecordListViewModel recordListViewModel;
+
+    @Inject
+    public ViewModelProviderFactory providerFactory;
 
     private AppBarConfiguration mAppBarConfiguration;
 
@@ -50,6 +58,9 @@ public class MapsActivity extends AppCompatActivity{
         NavController navController = Navigation.findNavController(this, R.id.fragment_container);
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
+
+        recordListViewModel = new ViewModelProvider(this, providerFactory).get(RecordListViewModel.class);
+
     }
 
     @Override
