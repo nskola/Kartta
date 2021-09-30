@@ -14,5 +14,4 @@ TODO Features:
 * Record editing
 
 TODO Other:
-* implement Android viewmodels
 * Optimize dagger injections
