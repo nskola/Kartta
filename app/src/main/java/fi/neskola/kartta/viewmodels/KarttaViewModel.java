@@ -2,6 +2,7 @@ package fi.neskola.kartta.viewmodels;
 
 import androidx.annotation.Nullable;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -16,7 +17,7 @@ import fi.neskola.kartta.repository.KarttaRepository;
 import static fi.neskola.kartta.viewmodels.ViewState.copyViewStateFromOld;
 
 @Singleton
-public class KarttaViewModel {
+public class KarttaViewModel extends ViewModel {
 
     private MutableLiveData<ViewState> viewStateObservable = new MutableLiveData<>();
 

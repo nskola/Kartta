@@ -15,6 +15,4 @@ public abstract class ViewModelFactoryModule {
     @Binds
     public abstract ViewModelProvider.Factory bindViewModelFactory(ViewModelProviderFactory viewModelProviderFactory);
 
-
-
 }

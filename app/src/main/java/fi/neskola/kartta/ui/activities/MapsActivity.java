@@ -29,9 +29,7 @@ public class MapsActivity extends AppCompatActivity{
     @Inject
     public KarttaRepository karttaRepository;
 
-    @Inject
     KarttaViewModel karttaViewModel;
-
     RecordListViewModel recordListViewModel;
 
     @Inject
@@ -59,7 +57,9 @@ public class MapsActivity extends AppCompatActivity{
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
-        recordListViewModel = new ViewModelProvider(this, providerFactory).get(RecordListViewModel.class);
+        ViewModelProvider viewModelProvider = new ViewModelProvider(this, providerFactory);
+        recordListViewModel = viewModelProvider.get(RecordListViewModel.class);
+        karttaViewModel = viewModelProvider.get(KarttaViewModel.class);
 
     }
 

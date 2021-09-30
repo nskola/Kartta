@@ -16,7 +16,7 @@ import fi.neskola.kartta.ui.fragments.RecordListFragment;
         ApplicationModule.class,
         DatabaseModule.class,
         ViewModelFactoryModule.class,
-        RecordListViewModelsModule.class
+        ViewModelsModule.class
 })
 public interface ApplicationComponent {
     void inject (KarttaApplication karttaApplication);
